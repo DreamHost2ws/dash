@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <title>Legacy Cloud — Control Panel</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=JetBrains+Mono:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
@@ -17,294 +17,1737 @@
   --glow-purple:0 0 30px rgba(124,58,237,.15);
   --glow-green:0 0 20px rgba(0,255,157,.1);
 }
+
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;min-height:100vh;overflow-x:hidden;user-select:none;-webkit-user-select:none;cursor:default}
+
+/* MOBILE-FIRST RESPONSIVE */
+html, body { font-size: 16px; }
+@media (max-width: 480px) { html, body { font-size: 14px; } }
+@media (max-width: 360px) { html, body { font-size: 13px; } }
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'JetBrains Mono',monospace;
+  min-height:100vh;
+  overflow-x:hidden;
+  user-select:none;
+  -webkit-user-select:none;
+  cursor:default;
+  background-attachment:fixed;
+}
+
+/* BACKGROUND WITH JPG IMAGE & VIDEO SUPPORT */
+body::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:var(--bg-image);
+  background-size:cover;
+  background-position:center;
+  background-attachment:fixed;
+  z-index:0;
+}
+
+/* VIDEO BACKGROUND (optional) */
+.video-bg {
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  z-index:0;
+  opacity:0.3;
+}
+
+/* OVERLAY */
+body::after {
+  content:'';
+  position:fixed;
+  inset:0;
+  background:rgba(3,6,15,0.75);
+  backdrop-filter:blur(2px);
+  z-index:1;
+}
+
 /* GRID BACKGROUND */
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
-body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 15% 0%,rgba(124,58,237,.08) 0,transparent 50%),radial-gradient(ellipse at 85% 100%,rgba(0,212,255,.06) 0,transparent 50%);pointer-events:none;z-index:0}
+.grid-bg {
+  position:fixed;
+  inset:0;
+  background-image:linear-gradient(rgba(0,212,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.03) 1px,transparent 1px);
+  background-size:50px 50px;
+  pointer-events:none;
+  z-index:2;
+}
+
+/* RADIAL GLOW */
+.glow-bg {
+  position:fixed;
+  inset:0;
+  background:radial-gradient(ellipse at 15% 0%,rgba(124,58,237,.08) 0,transparent 50%),radial-gradient(ellipse at 85% 100%,rgba(0,212,255,.06) 0,transparent 50%);
+  pointer-events:none;
+  z-index:2;
+}
 
 /* SCANLINE overlay */
-.scanlines{position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);pointer-events:none;z-index:1000;opacity:.5}
+.scanlines{
+  position:fixed;
+  inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);
+  pointer-events:none;
+  z-index:1000;
+  opacity:.5;
+}
 
-/* SIDEBAR */
-.sidebar{position:fixed;left:0;top:0;bottom:0;width:260px;background:var(--bg2);border-right:1px solid var(--border2);display:flex;flex-direction:column;z-index:200;overflow-y:auto}
-.sidebar::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent)}
+/* SIDEBAR - MOBILE RESPONSIVE */
+.sidebar{
+  position:fixed;
+  left:0;
+  top:0;
+  bottom:0;
+  width:260px;
+  background:var(--bg2);
+  border-right:1px solid var(--border2);
+  display:flex;
+  flex-direction:column;
+  z-index:200;
+  overflow-y:auto;
+  transition:transform .3s ease;
+}
 
-.logo-area{padding:24px 20px 20px;border-bottom:1px solid var(--border2);position:relative}
-.logo-glow{position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);filter:blur(4px)}
-.logo-wrap{display:flex;align-items:center;gap:14px}
-.logo-icon{width:44px;height:44px;position:relative;flex-shrink:0}
-.logo-icon svg{width:44px;height:44px}
-.logo-text{font-family:'Orbitron',monospace;font-weight:900;font-size:16px;letter-spacing:3px;line-height:1.2;color:var(--accent);text-shadow:0 0 20px rgba(0,212,255,.5)}
-.logo-sub{font-size:9px;letter-spacing:4px;color:var(--text3);text-transform:uppercase;margin-top:2px}
+.sidebar::before{
+  content:'';
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+}
+
+/* MOBILE SIDEBAR TOGGLE */
+@media (max-width: 768px) {
+  .sidebar {
+    width:100%;
+    max-width:280px;
+    transform:translateX(-100%);
+    z-index:300;
+  }
+  
+  .sidebar.active {
+    transform:translateX(0);
+  }
+  
+  .sidebar-toggle {
+    display:block;
+    position:fixed;
+    top:12px;
+    left:12px;
+    z-index:250;
+    width:40px;
+    height:40px;
+    background:var(--surface2);
+    border:1px solid var(--border2);
+    border-radius:6px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar-toggle {
+    display:flex !important;
+  }
+}
+
+.logo-area{
+  padding:24px 20px 20px;
+  border-bottom:1px solid var(--border2);
+  position:relative;
+}
+
+.logo-glow{
+  position:absolute;
+  top:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:120px;
+  height:2px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  filter:blur(4px);
+}
+
+.logo-wrap{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.logo-icon{
+  width:44px;
+  height:44px;
+  position:relative;
+  flex-shrink:0;
+}
+
+.logo-icon svg{
+  width:44px;
+  height:44px;
+}
+
+.logo-text{
+  font-family:'Orbitron',monospace;
+  font-weight:900;
+  font-size:16px;
+  letter-spacing:3px;
+  line-height:1.2;
+  color:var(--accent);
+  text-shadow:0 0 20px rgba(0,212,255,.5);
+}
+
+.logo-sub{
+  font-size:9px;
+  letter-spacing:4px;
+  color:var(--text3);
+  text-transform:uppercase;
+  margin-top:2px;
+}
 
 /* NAV */
-.nav{padding:12px 10px;flex:1}
-.nav-group{margin-bottom:20px}
-.nav-group-label{font-size:8px;letter-spacing:3px;color:var(--text3);padding:0 10px;margin-bottom:6px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
-.nav-group-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.nav{
+  padding:12px 10px;
+  flex:1;
+}
 
-.nav-item{display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:6px;cursor:pointer;transition:all .2s;color:var(--text2);font-size:11px;margin-bottom:1px;border:1px solid transparent;position:relative;letter-spacing:.5px}
-.nav-item:hover{background:var(--surface);color:var(--text);border-color:var(--border2)}
-.nav-item.active{background:rgba(0,212,255,.08);color:var(--accent);border-color:rgba(0,212,255,.2);box-shadow:var(--glow-blue)}
-.nav-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--accent);border-radius:0 3px 3px 0;box-shadow:0 0 10px var(--accent)}
-.nav-item.admin-nav{color:var(--admin)}
-.nav-item.admin-nav.active{background:rgba(255,107,53,.08);color:var(--admin);border-color:rgba(255,107,53,.2)}
-.nav-item.admin-nav.active::before{background:var(--admin);box-shadow:0 0 10px var(--admin)}
-.nav-item .ni{width:16px;text-align:center;flex-shrink:0;font-size:14px}
-.nav-badge{margin-left:auto;padding:2px 7px;border-radius:3px;font-size:9px;font-weight:700;letter-spacing:1px}
-.nb-blue{background:rgba(0,212,255,.15);color:var(--accent);border:1px solid rgba(0,212,255,.3)}
-.nb-gold{background:rgba(255,215,0,.15);color:var(--gold);border:1px solid rgba(255,215,0,.3)}
-.nb-admin{background:rgba(255,107,53,.15);color:var(--admin);border:1px solid rgba(255,107,53,.3)}
-.nb-green{background:rgba(0,255,157,.12);color:var(--green);border:1px solid rgba(0,255,157,.25)}
+.nav-group{
+  margin-bottom:20px;
+}
+
+.nav-group-label{
+  font-size:8px;
+  letter-spacing:3px;
+  color:var(--text3);
+  padding:0 10px;
+  margin-bottom:6px;
+  text-transform:uppercase;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.nav-group-label::after{
+  content:'';
+  flex:1;
+  height:1px;
+  background:var(--border);
+}
+
+.nav-item{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:11px 11px;
+  border-radius:6px;
+  cursor:pointer;
+  transition:all .2s;
+  color:var(--text2);
+  font-size:11px;
+  margin-bottom:1px;
+  border:1px solid transparent;
+  position:relative;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-touch-callout:none;
+  min-height:44px;
+}
+
+.nav-item:hover{
+  background:var(--surface);
+  color:var(--text);
+  border-color:var(--border2);
+}
+
+.nav-item.active{
+  background:rgba(0,212,255,.08);
+  color:var(--accent);
+  border-color:rgba(0,212,255,.2);
+  box-shadow:var(--glow-blue);
+}
+
+.nav-item.active::before{
+  content:'';
+  position:absolute;
+  left:0;
+  top:50%;
+  transform:translateY(-50%);
+  width:3px;
+  height:60%;
+  background:var(--accent);
+  border-radius:0 3px 3px 0;
+  box-shadow:0 0 10px var(--accent);
+}
+
+.nav-item.admin-nav{
+  color:var(--admin);
+}
+
+.nav-item.admin-nav.active{
+  background:rgba(255,107,53,.08);
+  color:var(--admin);
+  border-color:rgba(255,107,53,.2);
+}
+
+.nav-item.admin-nav.active::before{
+  background:var(--admin);
+  box-shadow:0 0 10px var(--admin);
+}
+
+.nav-item .ni{
+  width:16px;
+  text-align:center;
+  flex-shrink:0;
+  font-size:14px;
+}
+
+.nav-badge{
+  margin-left:auto;
+  padding:2px 7px;
+  border-radius:3px;
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:1px;
+}
+
+.nb-blue{background:rgba(0,212,255,.15);color:var(--accent);border:1px solid rgba(0,212,255,.3);}
+.nb-gold{background:rgba(255,215,0,.15);color:var(--gold);border:1px solid rgba(255,215,0,.3);}
+.nb-admin{background:rgba(255,107,53,.15);color:var(--admin);border:1px solid rgba(255,107,53,.3);}
+.nb-green{background:rgba(0,255,157,.12);color:var(--green);border:1px solid rgba(0,255,157,.25);}
 
 /* PANEL LINKS */
-.panel-links{padding:12px 10px;border-top:1px solid var(--border2);border-bottom:1px solid var(--border2);margin-bottom:8px}
-.panel-link-label{font-size:8px;letter-spacing:3px;color:var(--text3);margin-bottom:8px;text-transform:uppercase}
-.panel-btn{display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:6px;border:1px solid var(--border2);cursor:pointer;transition:all .2s;margin-bottom:6px;text-decoration:none;font-size:11px;font-family:'JetBrains Mono',monospace}
-.panel-btn-paid{background:rgba(255,215,0,.06);color:var(--gold);border-color:rgba(255,215,0,.25)}
-.panel-btn-paid:hover{background:rgba(255,215,0,.12);box-shadow:0 0 15px rgba(255,215,0,.1)}
-.panel-btn-free{background:rgba(0,212,255,.05);color:var(--accent);border-color:rgba(0,212,255,.2)}
-.panel-btn-free:hover{background:rgba(0,212,255,.1);box-shadow:0 0 15px rgba(0,212,255,.08)}
-.panel-dot{width:7px;height:7px;border-radius:50%}
-.panel-dot-paid{background:var(--gold);box-shadow:0 0 8px var(--gold)}
-.panel-dot-free{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.panel-links{
+  padding:12px 10px;
+  border-top:1px solid var(--border2);
+  border-bottom:1px solid var(--border2);
+  margin-bottom:8px;
+}
+
+.panel-link-label{
+  font-size:8px;
+  letter-spacing:3px;
+  color:var(--text3);
+  margin-bottom:8px;
+  text-transform:uppercase;
+}
+
+.panel-btn{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:11px 12px;
+  border-radius:6px;
+  border:1px solid var(--border2);
+  cursor:pointer;
+  transition:all .2s;
+  margin-bottom:6px;
+  text-decoration:none;
+  font-size:11px;
+  min-height:44px;
+  touch-action:manipulation;
+}
+
+.panel-btn-paid{
+  background:rgba(255,215,0,.06);
+  color:var(--gold);
+  border-color:rgba(255,215,0,.25);
+}
+
+.panel-btn-paid:hover{
+  background:rgba(255,215,0,.12);
+  box-shadow:0 0 15px rgba(255,215,0,.1);
+}
+
+.panel-btn-free{
+  background:rgba(0,212,255,.05);
+  color:var(--accent);
+  border-color:rgba(0,212,255,.2);
+}
+
+.panel-btn-free:hover{
+  background:rgba(0,212,255,.1);
+  box-shadow:0 0 15px rgba(0,212,255,.08);
+}
+
+.panel-dot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+}
+
+.panel-dot-paid{
+  background:var(--gold);
+  box-shadow:0 0 8px var(--gold);
+}
+
+.panel-dot-free{
+  background:var(--accent);
+  box-shadow:0 0 8px var(--accent);
+}
 
 /* USER */
-.sidebar-footer{padding:12px 10px}
-.user-card{background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:12px;cursor:pointer;transition:border-color .2s}
-.user-card:hover{border-color:var(--border3)}
-.user-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.avatar{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--accent2),var(--accent));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;position:relative}
-.avatar::after{content:'';position:absolute;inset:-1px;border-radius:9px;border:1px solid rgba(0,212,255,.3)}
-.avatar-admin{background:linear-gradient(135deg,var(--admin),#ff4500)}
-.user-info .un{font-size:12px;font-weight:700;color:var(--text);letter-spacing:.5px}
-.user-info .up{font-size:10px;color:var(--text2)}
-.coins-row{display:flex;align-items:center;gap:6px;background:rgba(255,215,0,.07);border:1px solid rgba(255,215,0,.2);border-radius:5px;padding:5px 10px;font-size:11px;color:var(--gold);font-weight:600}
+.sidebar-footer{
+  padding:12px 10px;
+}
 
-/* MAIN */
-.main{margin-left:260px;min-height:100vh;position:relative;z-index:1}
-.topbar{padding:16px 28px;border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between;background:rgba(3,6,15,.9);backdrop-filter:blur(16px);position:sticky;top:0;z-index:100}
-.topbar::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.3}
-.topbar-left{display:flex;align-items:center;gap:14px}
-.topbar-title{font-family:'Orbitron',monospace;font-size:15px;font-weight:700;letter-spacing:2px;color:var(--text)}
-.breadcrumb{font-size:10px;color:var(--text3);letter-spacing:1px}
-.topbar-right{display:flex;align-items:center;gap:10px}
-.tb-coins{display:flex;align-items:center;gap:6px;background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.25);border-radius:6px;padding:6px 14px;font-size:12px;font-weight:700;color:var(--gold);letter-spacing:.5px}
-.tb-status{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--green);background:rgba(0,255,157,.06);border:1px solid rgba(0,255,157,.2);border-radius:6px;padding:6px 12px}
-.tb-status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
+.user-card{
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:8px;
+  padding:12px;
+  cursor:pointer;
+  transition:border-color .2s;
+  min-height:44px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+
+.user-card:hover{
+  border-color:var(--border3);
+}
+
+.user-top{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:8px;
+}
+
+.avatar{
+  width:36px;
+  height:36px;
+  border-radius:8px;
+  background:linear-gradient(135deg,var(--accent2),var(--accent));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  font-weight:700;
+  color:#fff;
+  position:relative;
+  flex-shrink:0;
+}
+
+.avatar::after{
+  content:'';
+  position:absolute;
+  inset:-1px;
+  border-radius:9px;
+  border:1px solid rgba(0,212,255,.3);
+}
+
+.avatar-admin{
+  background:linear-gradient(135deg,var(--admin),#ff4500);
+}
+
+.user-info .un{
+  font-size:12px;
+  font-weight:700;
+  color:var(--text);
+  letter-spacing:.5px;
+}
+
+.user-info .up{
+  font-size:10px;
+  color:var(--text2);
+}
+
+.coins-row{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  background:rgba(255,215,0,.07);
+  border:1px solid rgba(255,215,0,.2);
+  border-radius:5px;
+  padding:6px 10px;
+  font-size:11px;
+  color:var(--gold);
+  font-weight:700;
+}
+
+/* MAIN - MOBILE RESPONSIVE */
+.main{
+  margin-left:260px;
+  min-height:100vh;
+  position:relative;
+  z-index:3;
+}
+
+@media (max-width: 768px) {
+  .main {
+    margin-left:0;
+  }
+}
+
+.topbar{
+  padding:16px 28px;
+  border-bottom:1px solid var(--border2);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  background:rgba(3,6,15,.9);
+  backdrop-filter:blur(16px);
+  position:sticky;
+  top:0;
+  z-index:100;
+  min-height:64px;
+}
+
+@media (max-width: 768px) {
+  .topbar {
+    padding:12px 16px;
+    min-height:56px;
+  }
+  
+  .topbar-right {
+    gap:8px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .topbar {
+    flex-direction:column;
+    gap:10px;
+    align-items:flex-start;
+  }
+}
+
+.topbar::after{
+  content:'';
+  position:absolute;
+  bottom:-1px;
+  left:0;
+  right:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  opacity:.3;
+}
+
+.topbar-left{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.topbar-title{
+  font-family:'Orbitron',monospace;
+  font-size:15px;
+  font-weight:700;
+  letter-spacing:2px;
+  color:var(--text);
+}
+
+.breadcrumb{
+  font-size:10px;
+  color:var(--text3);
+  letter-spacing:1px;
+}
+
+.topbar-right{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.tb-coins{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  background:rgba(255,215,0,.08);
+  border:1px solid rgba(255,215,0,.25);
+  border-radius:6px;
+  padding:8px 14px;
+  font-size:12px;
+  font-weight:700;
+  color:var(--gold);
+  min-height:44px;
+}
+
+.tb-status{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  font-size:10px;
+  color:var(--green);
+  background:rgba(0,255,157,.06);
+  border:1px solid rgba(0,255,157,.2);
+  border-radius:6px;
+  padding:8px 12px;
+  min-height:44px;
+}
+
+.tb-status-dot{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 8px var(--green);
+  animation:pulse 2s infinite;
+}
 
 /* BTN */
-.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:6px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:11px;border:none;transition:all .2s;font-weight:600;letter-spacing:.5px;position:relative;overflow:hidden}
-.btn::before{content:'';position:absolute;inset:0;background:linear-gradient(rgba(255,255,255,.05),transparent);opacity:0;transition:opacity .2s}
-.btn:hover::before{opacity:1}
-.btn-primary{background:linear-gradient(135deg,rgba(0,212,255,.15),rgba(0,212,255,.08));color:var(--accent);border:1px solid rgba(0,212,255,.3);box-shadow:var(--glow-blue)}
-.btn-primary:hover{background:linear-gradient(135deg,rgba(0,212,255,.25),rgba(0,212,255,.12));transform:translateY(-1px)}
-.btn-danger{background:rgba(255,51,102,.1);color:var(--red);border:1px solid rgba(255,51,102,.3)}
-.btn-danger:hover{background:rgba(255,51,102,.15)}
-.btn-ghost{background:var(--surface2);color:var(--text2);border:1px solid var(--border2)}
-.btn-ghost:hover{color:var(--text);border-color:var(--border3)}
-.btn-gold{background:linear-gradient(135deg,rgba(255,215,0,.15),rgba(255,215,0,.05));color:var(--gold);border:1px solid rgba(255,215,0,.3)}
-.btn-gold:hover{background:linear-gradient(135deg,rgba(255,215,0,.25),rgba(255,215,0,.1))}
-.btn-admin{background:linear-gradient(135deg,rgba(255,107,53,.2),rgba(255,107,53,.08));color:var(--admin);border:1px solid rgba(255,107,53,.3)}
-.btn-discord{background:rgba(88,101,242,.15);color:#818cf8;border:1px solid rgba(88,101,242,.3)}
-.btn-green{background:rgba(0,255,157,.08);color:var(--green);border:1px solid rgba(0,255,157,.25)}
+.btn{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  padding:10px 16px;
+  border-radius:6px;
+  cursor:pointer;
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  border:none;
+  transition:all .2s;
+  font-weight:700;
+  position:relative;
+  overflow:hidden;
+  letter-spacing:.5px;
+  min-height:44px;
+  -webkit-touch-callout:none;
+  touch-action:manipulation;
+}
 
-/* CONTENT */
-.content{padding:26px 28px}
-.tab-content{display:none}
-.tab-content.active{display:block;animation:fadeIn .25s ease}
+.btn::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(rgba(255,255,255,.05),transparent);
+  opacity:0;
+  transition:opacity .2s;
+}
+
+.btn:hover::before{
+  opacity:1;
+}
+
+.btn-primary{
+  background:linear-gradient(135deg,rgba(0,212,255,.15),rgba(0,212,255,.08));
+  color:var(--accent);
+  border:1px solid rgba(0,212,255,.3);
+  box-shadow:var(--glow-blue);
+}
+
+.btn-primary:hover{
+  background:linear-gradient(135deg,rgba(0,212,255,.25),rgba(0,212,255,.12));
+  transform:translateY(-1px);
+}
+
+.btn-danger{
+  background:rgba(255,51,102,.1);
+  color:var(--red);
+  border:1px solid rgba(255,51,102,.3);
+}
+
+.btn-danger:hover{
+  background:rgba(255,51,102,.15);
+}
+
+.btn-ghost{
+  background:var(--surface2);
+  color:var(--text2);
+  border:1px solid var(--border2);
+}
+
+.btn-ghost:hover{
+  color:var(--text);
+  border-color:var(--border3);
+}
+
+.btn-gold{
+  background:linear-gradient(135deg,rgba(255,215,0,.15),rgba(255,215,0,.05));
+  color:var(--gold);
+  border:1px solid rgba(255,215,0,.3);
+}
+
+.btn-gold:hover{
+  background:linear-gradient(135deg,rgba(255,215,0,.25),rgba(255,215,0,.1));
+}
+
+.btn-admin{
+  background:linear-gradient(135deg,rgba(255,107,53,.2),rgba(255,107,53,.08));
+  color:var(--admin);
+  border:1px solid rgba(255,107,53,.3);
+}
+
+.btn-discord{
+  background:rgba(88,101,242,.15);
+  color:#818cf8;
+  border:1px solid rgba(88,101,242,.3);
+}
+
+.btn-green{
+  background:rgba(0,255,157,.08);
+  color:var(--green);
+  border:1px solid rgba(0,255,157,.25);
+}
+
+/* CONTENT - MOBILE RESPONSIVE */
+.content{
+  padding:26px 28px;
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding:18px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    padding:12px 12px;
+  }
+}
+
+.tab-content{
+  display:none;
+}
+
+.tab-content.active{
+  display:block;
+  animation:fadeIn .25s ease;
+}
+
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 @keyframes glow{0%,100%{box-shadow:0 0 5px currentColor}50%{box-shadow:0 0 20px currentColor}}
 @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 
 /* CARDS */
-.card{background:var(--surface);border:1px solid var(--border2);border-radius:10px;overflow:hidden;position:relative}
-.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,212,255,.2),transparent)}
-.card-header{padding:16px 20px;border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between}
-.card-title{font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--text);display:flex;align-items:center;gap:8px}
-.card-body{padding:18px 20px}
+.card{
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:10px;
+  overflow:hidden;
+  position:relative;
+}
 
-/* STATS GRID */
-.stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:22px}
-.stat-card{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:18px;position:relative;overflow:hidden;transition:all .25s;cursor:default}
-.stat-card:hover{border-color:var(--border3);transform:translateY(-2px)}
-.stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,currentColor,transparent);opacity:.2}
-.stat-label{font-size:8px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:10px}
-.stat-value{font-family:'Orbitron',monospace;font-size:28px;font-weight:900;line-height:1}
-.stat-sub{font-size:9px;color:var(--text3);margin-top:7px;letter-spacing:.5px}
-.stat-card.c-blue .stat-value{color:var(--accent);text-shadow:0 0 20px rgba(0,212,255,.4)}
-.stat-card.c-purple .stat-value{color:#a78bfa;text-shadow:0 0 20px rgba(167,139,250,.4)}
-.stat-card.c-green .stat-value{color:var(--green);text-shadow:0 0 20px rgba(0,255,157,.3)}
-.stat-card.c-yellow .stat-value{color:var(--yellow);text-shadow:0 0 20px rgba(255,204,0,.3)}
-.stat-card.c-gold .stat-value{color:var(--gold);text-shadow:0 0 20px rgba(255,215,0,.3)}
-.stat-glow{position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;filter:blur(30px);opacity:.15}
-.g-blue{background:var(--accent)}.g-purple{background:var(--accent2)}.g-green{background:var(--green)}.g-yellow{background:var(--yellow)}.g-gold{background:var(--gold)}
+.card::before{
+  content:'';
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,212,255,.2),transparent);
+}
 
-/* SERVER CARDS */
-.server-grid{display:flex;flex-direction:column;gap:10px}
-.server-card{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:16px;transition:border-color .2s;position:relative;overflow:hidden}
-.server-card:hover{border-color:var(--border3)}
-.server-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
-.server-card.s-online::before{background:var(--green);box-shadow:0 0 10px var(--green)}
-.server-card.s-offline::before{background:var(--text3)}
-.server-card.s-starting::before{background:var(--yellow);animation:glow 1.5s infinite;color:var(--yellow)}
-.server-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-.server-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.sd-online{background:var(--green);box-shadow:0 0 8px var(--green)}
-.sd-offline{background:var(--text3)}
-.sd-starting{background:var(--yellow);box-shadow:0 0 8px var(--yellow);animation:pulse 1.5s infinite}
-.server-name{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;letter-spacing:1px}
-.server-type{font-size:9px;color:var(--text3);letter-spacing:1px;margin-top:2px;text-transform:uppercase}
-.server-actions{display:flex;gap:6px;margin-left:auto}
-.server-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.metric{position:relative}
-.metric-label{font-size:8px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
-.metric-val{font-size:12px;font-weight:600;margin-bottom:5px}
-.metric-val.ok{color:var(--green)}.metric-val.warn{color:var(--yellow)}.metric-val.crit{color:var(--red)}
-.pbar{height:3px;background:var(--border2);border-radius:2px;overflow:hidden}
-.pbar-fill{height:100%;border-radius:2px;transition:width .6s}
-.pb-blue{background:linear-gradient(90deg,var(--accent),rgba(0,212,255,.5))}
-.pb-green{background:linear-gradient(90deg,var(--green),rgba(0,255,157,.5))}
-.pb-red{background:linear-gradient(90deg,var(--red),rgba(255,51,102,.5))}
-.pb-yellow{background:linear-gradient(90deg,var(--yellow),rgba(255,204,0,.5))}
+.card-header{
+  padding:16px 20px;
+  border-bottom:1px solid var(--border2);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.card-title{
+  font-family:'Orbitron',monospace;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:2px;
+  color:var(--text);
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.card-body{
+  padding:18px 20px;
+}
+
+/* STATS GRID - MOBILE RESPONSIVE */
+.stats-grid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:14px;
+  margin-bottom:22px;
+}
+
+@media (max-width: 1100px) {
+  .stats-grid {
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns:repeat(1,1fr);
+  }
+}
+
+.stat-card{
+  background:var(--surface2);
+  border:1px solid var(--border2);
+  border-radius:10px;
+  padding:18px;
+  position:relative;
+  overflow:hidden;
+  transition:all .25s;
+  cursor:default;
+  min-height:120px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+
+.stat-card:hover{
+  border-color:var(--border3);
+  transform:translateY(-2px);
+}
+
+.stat-card::after{
+  content:'';
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,currentColor,transparent);
+  opacity:.2;
+}
+
+.stat-label{
+  font-size:8px;
+  letter-spacing:2px;
+  color:var(--text3);
+  text-transform:uppercase;
+  margin-bottom:10px;
+}
+
+.stat-value{
+  font-family:'Orbitron',monospace;
+  font-size:28px;
+  font-weight:900;
+  line-height:1;
+}
+
+.stat-sub{
+  font-size:9px;
+  color:var(--text3);
+  margin-top:7px;
+  letter-spacing:.5px;
+}
+
+.stat-card.c-blue .stat-value{color:var(--accent);text-shadow:0 0 20px rgba(0,212,255,.4);}
+.stat-card.c-purple .stat-value{color:#a78bfa;text-shadow:0 0 20px rgba(167,139,250,.4);}
+.stat-card.c-green .stat-value{color:var(--green);text-shadow:0 0 20px rgba(0,255,157,.3);}
+.stat-card.c-yellow .stat-value{color:var(--yellow);text-shadow:0 0 20px rgba(255,204,0,.3);}
+.stat-card.c-gold .stat-value{color:var(--gold);text-shadow:0 0 20px rgba(255,215,0,.3);}
+
+.stat-glow{
+  position:absolute;
+  top:-20px;
+  right:-20px;
+  width:80px;
+  height:80px;
+  border-radius:50%;
+  filter:blur(30px);
+  opacity:.15;
+}
+
+.g-blue{background:var(--accent);}
+.g-purple{background:var(--accent2);}
+.g-green{background:var(--green);}
+.g-yellow{background:var(--yellow);}
+.g-gold{background:var(--gold);}
+
+/* SERVER CARDS - MOBILE RESPONSIVE */
+.server-grid{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.server-card{
+  background:var(--surface2);
+  border:1px solid var(--border2);
+  border-radius:10px;
+  padding:16px;
+  transition:border-color .2s;
+  position:relative;
+  overflow:hidden;
+  min-height:120px;
+}
+
+.server-card:hover{
+  border-color:var(--border3);
+}
+
+.server-card::before{
+  content:'';
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width:3px;
+}
+
+.server-card.s-online::before{background:var(--green);box-shadow:0 0 10px var(--green);}
+.server-card.s-offline::before{background:var(--text3);}
+.server-card.s-starting::before{background:var(--yellow);animation:glow 1.5s infinite;color:var(--yellow);}
+
+.server-top{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:14px;
+  flex-wrap:wrap;
+}
+
+.server-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  flex-shrink:0;
+}
+
+.sd-online{background:var(--green);box-shadow:0 0 8px var(--green);}
+.sd-offline{background:var(--text3);}
+.sd-starting{background:var(--yellow);box-shadow:0 0 8px var(--yellow);animation:pulse 1.5s infinite;}
+
+.server-name{
+  font-family:'Orbitron',monospace;
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:1px;
+}
+
+.server-type{
+  font-size:9px;
+  color:var(--text3);
+  letter-spacing:1px;
+  margin-top:2px;
+  text-transform:uppercase;
+}
+
+.server-actions{
+  display:flex;
+  gap:6px;
+  margin-left:auto;
+}
+
+.server-metrics{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+
+.metric{
+  position:relative;
+}
+
+.metric-label{
+  font-size:8px;
+  color:var(--text3);
+  letter-spacing:1px;
+  text-transform:uppercase;
+  margin-bottom:4px;
+}
+
+.metric-val{
+  font-size:12px;
+  font-weight:600;
+  margin-bottom:5px;
+}
+
+.metric-val.ok{color:var(--green);}
+.metric-val.warn{color:var(--yellow);}
+.metric-val.crit{color:var(--red);}
+
+.pbar{
+  height:3px;
+  background:var(--border2);
+  border-radius:2px;
+  overflow:hidden;
+}
+
+.pbar-fill{
+  height:100%;
+  border-radius:2px;
+  transition:width .6s;
+}
+
+.pb-blue{background:linear-gradient(90deg,var(--accent),rgba(0,212,255,.5));}
+.pb-green{background:linear-gradient(90deg,var(--green),rgba(0,255,157,.5));}
+.pb-red{background:linear-gradient(90deg,var(--red),rgba(255,51,102,.5));}
+.pb-yellow{background:linear-gradient(90deg,var(--yellow),rgba(255,204,0,.5));}
 
 /* STATUS PILLS */
-.pill{display:inline-flex;align-items:center;padding:3px 9px;border-radius:4px;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
-.pill-green{background:rgba(0,255,157,.1);color:var(--green);border:1px solid rgba(0,255,157,.25)}
-.pill-red{background:rgba(255,51,102,.1);color:var(--red);border:1px solid rgba(255,51,102,.25)}
-.pill-yellow{background:rgba(255,204,0,.1);color:var(--yellow);border:1px solid rgba(255,204,0,.25)}
-.pill-blue{background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.25)}
-.pill-gold{background:rgba(255,215,0,.1);color:var(--gold);border:1px solid rgba(255,215,0,.25)}
-.pill-admin{background:rgba(255,107,53,.1);color:var(--admin);border:1px solid rgba(255,107,53,.25)}
-.pill-purple{background:rgba(124,58,237,.15);color:#a78bfa;border:1px solid rgba(124,58,237,.3)}
+.pill{
+  display:inline-flex;
+  align-items:center;
+  padding:4px 10px;
+  border-radius:4px;
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  min-height:24px;
+}
 
-/* FORM */
-.form-group{margin-bottom:14px}
-.form-label{font-size:9px;letter-spacing:2px;color:var(--text2);margin-bottom:7px;display:block;text-transform:uppercase}
-.form-input{width:100%;padding:10px 13px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;transition:border-color .2s;letter-spacing:.3px}
-.form-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,212,255,.08)}
-.form-input::placeholder{color:var(--text3)}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pill-green{background:rgba(0,255,157,.1);color:var(--green);border:1px solid rgba(0,255,157,.25);}
+.pill-red{background:rgba(255,51,102,.1);color:var(--red);border:1px solid rgba(255,51,102,.25);}
+.pill-yellow{background:rgba(255,204,0,.1);color:var(--yellow);border:1px solid rgba(255,204,0,.25);}
+.pill-blue{background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.25);}
+.pill-gold{background:rgba(255,215,0,.1);color:var(--gold);border:1px solid rgba(255,215,0,.25);}
+.pill-admin{background:rgba(255,107,53,.1);color:var(--admin);border:1px solid rgba(255,107,53,.25);}
+.pill-purple{background:rgba(124,58,237,.15);color:#a78bfa;border:1px solid rgba(124,58,237,.3);}
 
-/* TABLE */
-.tbl{width:100%;border-collapse:collapse;font-size:11px}
-.tbl th{padding:9px 13px;text-align:left;color:var(--text3);font-size:8px;letter-spacing:2px;text-transform:uppercase;border-bottom:1px solid var(--border2);font-weight:600}
-.tbl td{padding:12px 13px;border-bottom:1px solid var(--border)}
-.tbl tr:last-child td{border-bottom:none}
-.tbl tr:hover td{background:rgba(255,255,255,.015)}
+/* FORM - MOBILE RESPONSIVE */
+.form-group{
+  margin-bottom:14px;
+}
+
+.form-label{
+  font-size:9px;
+  letter-spacing:2px;
+  color:var(--text2);
+  margin-bottom:7px;
+  display:block;
+  text-transform:uppercase;
+}
+
+.form-input{
+  width:100%;
+  padding:12px 13px;
+  background:var(--surface2);
+  border:1px solid var(--border2);
+  border-radius:6px;
+  color:var(--text);
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;
+  outline:none;
+  transition:border-color .2s;
+  min-height:44px;
+}
+
+.form-input:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 2px rgba(0,212,255,.08);
+}
+
+.form-input::placeholder{
+  color:var(--text3);
+}
+
+.form-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+@media (max-width: 480px) {
+  .form-row {
+    grid-template-columns:1fr;
+  }
+}
+
+/* TABLE - MOBILE RESPONSIVE */
+.tbl{
+  width:100%;
+  border-collapse:collapse;
+  font-size:11px;
+  overflow-x:auto;
+}
+
+.tbl th{
+  padding:11px 13px;
+  text-align:left;
+  color:var(--text3);
+  font-size:8px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  border-bottom:1px solid var(--border2);
+  font-weight:600;
+  min-height:44px;
+}
+
+.tbl td{
+  padding:14px 13px;
+  border-bottom:1px solid var(--border);
+  min-height:44px;
+}
+
+.tbl tr:last-child td{
+  border-bottom:none;
+}
+
+.tbl tr:hover td{
+  background:rgba(255,255,255,.015);
+}
 
 /* MODAL */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);z-index:500;align-items:center;justify-content:center}
-.modal-overlay.open{display:flex}
-.modal{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:28px;width:500px;max-width:95vw;animation:slideUp .3s ease;position:relative}
-.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent)}
-.modal-title{font-family:'Orbitron',monospace;font-size:14px;font-weight:700;letter-spacing:2px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between}
-.close-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;transition:color .2s}
-.close-btn:hover{color:var(--red)}
+.modal-overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.8);
+  backdrop-filter:blur(8px);
+  z-index:500;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+}
+
+.modal-overlay.open{
+  display:flex;
+}
+
+.modal{
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:12px;
+  padding:28px;
+  width:500px;
+  max-width:95vw;
+  animation:slideUp .3s ease;
+  position:relative;
+}
+
+.modal::before{
+  content:'';
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+}
+
+.modal-title{
+  font-family:'Orbitron',monospace;
+  font-size:14px;
+  font-weight:700;
+  letter-spacing:2px;
+  margin-bottom:20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.close-btn{
+  background:none;
+  border:none;
+  color:var(--text3);
+  cursor:pointer;
+  font-size:16px;
+  transition:color .2s;
+  width:32px;
+  height:32px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.close-btn:hover{
+  color:var(--red);
+}
 
 /* SECTION */
-.sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-.sec-title{font-family:'Orbitron',monospace;font-size:14px;font-weight:700;letter-spacing:2px;color:var(--text)}
-.notice{border-radius:6px;padding:10px 14px;font-size:11px;margin-bottom:16px;display:flex;align-items:center;gap:8px;letter-spacing:.3px}
-.notice-warn{background:rgba(255,204,0,.06);border:1px solid rgba(255,204,0,.2);color:var(--yellow)}
-.notice-info{background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.15);color:var(--accent)}
-.notice-green{background:rgba(0,255,157,.05);border:1px solid rgba(0,255,157,.15);color:var(--green)}
+.sec-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:18px;
+  flex-wrap:wrap;
+  gap:10px;
+}
 
-/* GRID LAYOUTS */
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
+.sec-title{
+  font-family:'Orbitron',monospace;
+  font-size:14px;
+  font-weight:700;
+  letter-spacing:2px;
+  color:var(--text);
+}
+
+.notice{
+  border-radius:6px;
+  padding:12px 14px;
+  font-size:11px;
+  margin-bottom:16px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  letter-spacing:.3px;
+  min-height:44px;
+}
+
+.notice-warn{background:rgba(255,204,0,.06);border:1px solid rgba(255,204,0,.2);color:var(--yellow);}
+.notice-info{background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.15);color:var(--accent);}
+.notice-green{background:rgba(0,255,157,.05);border:1px solid rgba(0,255,157,.15);color:var(--green);}
+
+/* GRID LAYOUTS - MOBILE RESPONSIVE */
+.g2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  margin-bottom:16px;
+}
+
+.g3{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:16px;
+  margin-bottom:16px;
+}
+
+@media (max-width: 768px) {
+  .g2, .g3 {
+    grid-template-columns:1fr;
+  }
+}
 
 /* TOAST */
-.toast{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:12px 18px;display:flex;align-items:center;gap:10px;font-size:11px;z-index:600;transform:translateX(140%);transition:transform .35s cubic-bezier(.34,1.56,.64,1);max-width:340px;letter-spacing:.3px}
-.toast::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,currentColor,transparent);opacity:.5}
-.toast.show{transform:translateX(0)}
-.toast.success{border-color:rgba(0,255,157,.3);color:var(--green)}
-.toast.error{border-color:rgba(255,51,102,.3);color:var(--red)}
-.toast.info{border-color:rgba(0,212,255,.3);color:var(--accent)}
-.toast.gold{border-color:rgba(255,215,0,.3);color:var(--gold)}
+.toast{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:8px;
+  padding:14px 18px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:11px;
+  z-index:600;
+  transform:translateX(400px);
+  transition:transform .3s ease;
+  min-height:44px;
+}
+
+.toast::before{
+  content:'';
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,currentColor,transparent);
+  opacity:.5;
+}
+
+.toast.show{
+  transform:translateX(0);
+}
+
+.toast.success{border-color:rgba(0,255,157,.3);color:var(--green);}
+.toast.error{border-color:rgba(255,51,102,.3);color:var(--red);}
+.toast.info{border-color:rgba(0,212,255,.3);color:var(--accent);}
+.toast.gold{border-color:rgba(255,215,0,.3);color:var(--gold);}
 
 /* NODE */
-.node-card{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:16px;margin-bottom:10px;transition:border-color .2s}
-.node-card:hover{border-color:var(--border3)}
-.node-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-.node-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.node-card{
+  background:var(--surface2);
+  border:1px solid var(--border2);
+  border-radius:10px;
+  padding:16px;
+  margin-bottom:10px;
+  transition:border-color .2s;
+}
+
+.node-card:hover{
+  border-color:var(--border3);
+}
+
+.node-head{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:14px;
+}
+
+.node-metrics{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+}
+
+@media (max-width: 768px) {
+  .node-metrics {
+    grid-template-columns:repeat(2,1fr);
+  }
+}
 
 /* STATUS */
-.svc-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--border)}
-.svc-row:last-child{border-bottom:none}
-.hist-wrap{display:flex;gap:2px;align-items:center}
-.hist-bar{width:5px;height:20px;border-radius:2px;background:rgba(0,255,157,.6)}
-.hist-bar.down{background:rgba(255,51,102,.6)}
-.hist-bar.partial{background:rgba(255,204,0,.6)}
+.svc-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:13px 0;
+  border-bottom:1px solid var(--border);
+  min-height:44px;
+}
+
+.svc-row:last-child{
+  border-bottom:none;
+}
+
+.hist-wrap{
+  display:flex;
+  gap:2px;
+  align-items:center;
+}
+
+.hist-bar{
+  width:5px;
+  height:20px;
+  border-radius:2px;
+  background:rgba(0,255,157,.6);
+}
+
+.hist-bar.down{background:rgba(255,51,102,.6);}
+.hist-bar.partial{background:rgba(255,204,0,.6);}
 
 /* COINS */
-.coin-shop{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
-.coin-pkg{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:18px;text-align:center;cursor:pointer;transition:all .2s}
-.coin-pkg:hover{border-color:rgba(255,215,0,.4);transform:translateY(-2px);box-shadow:0 8px 30px rgba(255,215,0,.05)}
-.coin-pkg.featured{border-color:rgba(255,215,0,.35);background:rgba(255,215,0,.04)}
-.coin-amt{font-family:'Orbitron',monospace;font-size:32px;font-weight:900;color:var(--gold);text-shadow:0 0 20px rgba(255,215,0,.3)}
-.coin-price{font-size:11px;color:var(--text2);margin:5px 0 14px}
-.earn-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border)}
-.earn-row:last-child{border-bottom:none}
+.coin-shop{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin-bottom:16px;
+}
+
+@media (max-width: 768px) {
+  .coin-shop {
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .coin-shop {
+    grid-template-columns:1fr;
+  }
+}
+
+.coin-pkg{
+  background:var(--surface2);
+  border:1px solid var(--border2);
+  border-radius:10px;
+  padding:18px;
+  text-align:center;
+  cursor:pointer;
+  transition:all .2s;
+  min-height:160px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+
+.coin-pkg:hover{
+  border-color:rgba(255,215,0,.4);
+  transform:translateY(-2px);
+  box-shadow:0 8px 30px rgba(255,215,0,.05);
+}
+
+.coin-pkg.featured{
+  border-color:rgba(255,215,0,.35);
+  background:rgba(255,215,0,.04);
+}
+
+.coin-amt{
+  font-family:'Orbitron',monospace;
+  font-size:32px;
+  font-weight:900;
+  color:var(--gold);
+  text-shadow:0 0 20px rgba(255,215,0,.3);
+}
+
+.coin-price{
+  font-size:11px;
+  color:var(--text2);
+  margin:5px 0 14px;
+}
+
+.earn-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:11px 0;
+  border-bottom:1px solid var(--border);
+  min-height:44px;
+}
+
+.earn-row:last-child{
+  border-bottom:none;
+}
 
 /* ADMIN */
-.admin-banner{background:linear-gradient(135deg,rgba(255,107,53,.12),rgba(255,107,53,.04));border:1px solid rgba(255,107,53,.25);border-radius:10px;padding:16px 20px;margin-bottom:18px;display:flex;align-items:center;gap:14px;position:relative;overflow:hidden}
-.admin-banner::before{content:'ADMIN ACCESS';position:absolute;right:-10px;top:50%;transform:translateY(-50%);font-family:'Orbitron',monospace;font-size:60px;font-weight:900;color:rgba(255,107,53,.04);letter-spacing:4px;pointer-events:none}
-.admin-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
-.adm-stat{background:rgba(255,107,53,.06);border:1px solid rgba(255,107,53,.15);border-radius:8px;padding:14px;text-align:center}
-.adm-stat-val{font-family:'Orbitron',monospace;font-size:26px;font-weight:900;color:var(--admin);text-shadow:0 0 15px rgba(255,107,53,.3)}
-.adm-stat-label{font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+.admin-banner{
+  background:linear-gradient(135deg,rgba(255,107,53,.12),rgba(255,107,53,.04));
+  border:1px solid rgba(255,107,53,.25);
+  border-radius:10px;
+  padding:16px 20px;
+  margin-bottom:18px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  position:relative;
+  overflow:hidden;
+  min-height:64px;
+}
+
+.admin-banner::before{
+  content:'ADMIN ACCESS';
+  position:absolute;
+  right:-10px;
+  top:50%;
+  transform:translateY(-50%);
+  font-family:'Orbitron',monospace;
+  font-size:60px;
+  font-weight:900;
+  color:rgba(255,107,53,.08);
+  letter-spacing:2px;
+}
+
+.admin-stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  margin-bottom:18px;
+}
+
+@media (max-width: 768px) {
+  .admin-stats {
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+.adm-stat{
+  background:rgba(255,107,53,.06);
+  border:1px solid rgba(255,107,53,.15);
+  border-radius:8px;
+  padding:14px;
+  text-align:center;
+  min-height:100px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+
+.adm-stat-val{
+  font-family:'Orbitron',monospace;
+  font-size:26px;
+  font-weight:900;
+  color:var(--admin);
+  text-shadow:0 0 15px rgba(255,107,53,.3);
+}
+
+.adm-stat-label{
+  font-size:9px;
+  color:var(--text3);
+  letter-spacing:1px;
+  text-transform:uppercase;
+  margin-top:4px;
+}
 
 /* SYSTEM MONITOR (admin) */
-.sys-monitor{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
-.sys-card{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:14px}
-.sys-title{font-size:9px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:10px}
-.sys-val{font-family:'Orbitron',monospace;font-size:24px;font-weight:900;margin-bottom:8px}
-.sys-ring-wrap{display:flex;align-items:center;gap:12px}
+.sys-monitor{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:12px;
+  margin-bottom:16px;
+}
+
+@media (max-width: 768px) {
+  .sys-monitor {
+    grid-template-columns:1fr;
+  }
+}
+
+.sys-card{
+  background:var(--surface2);
+  border:1px solid var(--border2);
+  border-radius:8px;
+  padding:14px;
+}
+
+.sys-title{
+  font-size:9px;
+  letter-spacing:2px;
+  color:var(--text3);
+  text-transform:uppercase;
+  margin-bottom:10px;
+}
+
+.sys-val{
+  font-family:'Orbitron',monospace;
+  font-size:24px;
+  font-weight:900;
+  margin-bottom:8px;
+}
+
+.sys-ring-wrap{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
 
 /* ACCESS DENIED */
-.access-denied{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:400px;text-align:center;gap:16px}
-.denied-icon{font-size:64px;filter:grayscale(.5)}
-.denied-title{font-family:'Orbitron',monospace;font-size:20px;font-weight:900;letter-spacing:3px;color:var(--red);text-shadow:0 0 20px rgba(255,51,102,.3)}
-.denied-text{font-size:12px;color:var(--text2);max-width:380px;line-height:1.8;letter-spacing:.3px}
+.access-denied{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  min-height:400px;
+  text-align:center;
+  gap:16px;
+}
+
+.denied-icon{
+  font-size:64px;
+  filter:grayscale(.5);
+}
+
+.denied-title{
+  font-family:'Orbitron',monospace;
+  font-size:20px;
+  font-weight:900;
+  letter-spacing:3px;
+  color:var(--red);
+  text-shadow:0 0 20px rgba(255,51,102,.3);
+}
+
+.denied-text{
+  font-size:12px;
+  color:var(--text2);
+  max-width:380px;
+  line-height:1.8;
+  letter-spacing:.3px;
+}
 
 /* PLAN CARDS */
-.plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
-.plan-card{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:20px;position:relative;transition:all .25s}
-.plan-card:hover{border-color:var(--border3);transform:translateY(-3px)}
-.plan-card.popular{border-color:rgba(0,212,255,.3);background:rgba(0,212,255,.03)}
-.pop-badge{position:absolute;top:-10px;right:14px;background:var(--accent);color:#000;font-size:9px;font-weight:800;padding:3px 12px;border-radius:3px;letter-spacing:2px;font-family:'Orbitron',monospace}
-.plan-name{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;letter-spacing:2px;margin-bottom:6px}
-.plan-price{font-family:'Orbitron',monospace;font-size:28px;font-weight:900;color:var(--accent);margin-bottom:14px}
-.plan-price small{font-size:12px;color:var(--text3);font-family:'JetBrains Mono',monospace;font-weight:400}
-.plan-feat{list-style:none;margin-bottom:16px}
-.plan-feat li{font-size:11px;color:var(--text2);padding:4px 0;display:flex;align-items:center;gap:7px;letter-spacing:.3px}
-.plan-feat li::before{content:'›';color:var(--accent);font-weight:900}
+.plan-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+  margin-bottom:20px;
+}
+
+@media (max-width: 768px) {
+  .plan-grid {
+    grid-template-columns:1fr;
+  }
+}
+
+.plan-card{
+  background:var(--surface2);
+  border:1px solid var(--border2);
+  border-radius:10px;
+  padding:20px;
+  position:relative;
+  transition:all .25s;
+  min-height:300px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+
+.plan-card:hover{
+  border-color:var(--border3);
+  transform:translateY(-3px);
+}
+
+.plan-card.popular{
+  border-color:rgba(0,212,255,.3);
+  background:rgba(0,212,255,.03);
+}
+
+.pop-badge{
+  position:absolute;
+  top:-10px;
+  right:14px;
+  background:var(--accent);
+  color:#000;
+  font-size:9px;
+  font-weight:800;
+  padding:4px 12px;
+  border-radius:3px;
+  letter-spacing:2px;
+  font-family:'Orbitron',monospace;
+}
+
+.plan-name{
+  font-family:'Orbitron',monospace;
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:2px;
+  margin-bottom:6px;
+}
+
+.plan-price{
+  font-family:'Orbitron',monospace;
+  font-size:28px;
+  font-weight:900;
+  color:var(--accent);
+  margin-bottom:14px;
+}
+
+.plan-price small{
+  font-size:12px;
+  color:var(--text3);
+  font-family:'JetBrains Mono',monospace;
+  font-weight:400;
+}
+
+.plan-feat{
+  list-style:none;
+  margin-bottom:16px;
+}
+
+.plan-feat li{
+  font-size:11px;
+  color:var(--text2);
+  padding:4px 0;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  letter-spacing:.3px;
+  min-height:32px;
+}
+
+.plan-feat li::before{
+  content:'›';
+  color:var(--accent);
+  font-weight:900;
+}
 
 /* SCROLLBAR */
-::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
-::-webkit-scrollbar-thumb:hover{background:var(--border3)}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+::-webkit-scrollbar-thumb:hover{background:var(--border3);}
 
 /* ACTIVITY */
-.act-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
-.act-item:last-child{border-bottom:none}
-.act-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px}
-.act-text{font-size:11px;color:var(--text2);flex:1;letter-spacing:.3px}
-.act-text strong{color:var(--text)}
-.act-time{font-size:10px;color:var(--text3);flex-shrink:0;letter-spacing:.5px}
+.act-item{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  padding:11px 0;
+  border-bottom:1px solid var(--border);
+  min-height:44px;
+}
+
+.act-item:last-child{
+  border-bottom:none;
+}
+
+.act-dot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  flex-shrink:0;
+  margin-top:6px;
+}
+
+.act-text{
+  font-size:11px;
+  color:var(--text2);
+  flex:1;
+  letter-spacing:.3px;
+}
+
+.act-text strong{
+  color:var(--text);
+}
+
+.act-time{
+  font-size:10px;
+  color:var(--text3);
+  flex-shrink:0;
+  letter-spacing:.5px;
+}
 
 /* DISCORD */
-.dc-banner{background:linear-gradient(135deg,rgba(88,101,242,.12),rgba(88,101,242,.04));border:1px solid rgba(88,101,242,.25);border-radius:10px;padding:20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.dc-banner{
+  background:linear-gradient(135deg,rgba(88,101,242,.12),rgba(88,101,242,.04));
+  border:1px solid rgba(88,101,242,.25);
+  border-radius:10px;
+  padding:20px;
+  margin-bottom:16px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-height:80px;
+}
 
-@media(max-width:1100px){.stats-grid{grid-template-columns:repeat(2,1fr)}.g2,.g3{grid-template-columns:1fr}.admin-stats{grid-template-columns:repeat(2,1fr)}}
+/* RESPONSIVE MEDIA QUERIES */
+@media(max-width:1100px){
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .g2,.g3{grid-template-columns:1fr;}
+  .admin-stats{grid-template-columns:repeat(2,1fr);}
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    max-width:100vw;
+  }
+  
+  .sidebar-toggle {
+    display:flex;
+  }
+  
+  .main {
+    margin-left:0;
+  }
+  
+  .topbar {
+    padding:12px 16px;
+  }
+  
+  .content {
+    padding:16px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  body { font-size: 13px; }
+  
+  .topbar {
+    flex-direction:column;
+    align-items:stretch;
+    padding:10px;
+    gap:8px;
+  }
+  
+  .topbar-title { font-size:13px; }
+  .content { padding:10px; }
+  .form-row { grid-template-columns:1fr; }
+  .stats-grid { grid-template-columns:1fr; }
+  .server-metrics { grid-template-columns:repeat(2,1fr); }
+  .coin-shop { grid-template-columns:1fr; }
+}
+
+/* HAPTIC FEEDBACK & TOUCH */
+@media (hover: none) and (pointer: coarse) {
+  .nav-item:active,
+  .btn:active,
+  .card:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
 </style>
 </head>
 <body>
 <div class="scanlines"></div>
+<div class="grid-bg"></div>
+<div class="glow-bg"></div>
+
+<!-- SIDEBAR TOGGLE (Mobile) -->
+<button class="sidebar-toggle" onclick="toggleSidebar()" style="display:none;">☰</button>
 
 <!-- SIDEBAR -->
 <nav class="sidebar">
@@ -420,10 +1863,10 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
     <!-- ═══ OVERVIEW ═══ -->
     <div class="tab-content active" id="tab-overview">
       <div class="stats-grid">
-        <div class="stat-card c-blue"><div class="stat-glow g-blue"></div><div class="stat-label">Active Servers</div><div class="stat-value" id="s-active">0</div><div class="stat-sub">↑ running now</div></div>
+        <div class="stat-card c-blue"><div class="stat-glow g-blue"></div><div class="stat-label">Active Servers</div><div class="stat-value" id="s-active">0</div><div class="stat-sub">↑ running</div></div>
         <div class="stat-card c-green"><div class="stat-glow g-green"></div><div class="stat-label">Uptime</div><div class="stat-value">99.8%</div><div class="stat-sub">Last 30 days</div></div>
         <div class="stat-card c-yellow"><div class="stat-glow g-yellow"></div><div class="stat-label">Monthly Cost</div><div class="stat-value">$15</div><div class="stat-sub">Next billing Jul 1</div></div>
-        <div class="stat-card c-purple"><div class="stat-glow g-purple"></div><div class="stat-label">Discord Members</div><div class="stat-value" id="s-members">—</div><div class="stat-sub">Community size</div></div>
+        <div class="stat-card c-purple"><div class="stat-glow g-purple"></div><div class="stat-label">Discord Members</div><div class="stat-value" id="s-members">—</div><div class="stat-sub">Community</div></div>
         <div class="stat-card c-gold"><div class="stat-glow g-gold"></div><div class="stat-label">Coin Balance</div><div class="stat-value" id="s-coins">0</div><div class="stat-sub">Legacy Coins</div></div>
       </div>
       <div class="g2">
@@ -456,10 +1899,10 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
           <div class="card-header"><div class="card-title">◼ Quick Links</div></div>
           <div class="card-body" style="display:flex;flex-direction:column;gap:8px">
             <a href="https://paid.legacycloud.fun/auth/login" target="_blank" class="btn btn-gold" style="justify-content:space-between">
-              <span>⚡ Paid Panel — paid.legacycloud.fun</span><span>↗</span>
+              <span>⚡ Paid Panel</span><span>↗</span>
             </a>
             <a href="https://free.legacycloud.fun/auth/login" target="_blank" class="btn btn-primary" style="justify-content:space-between">
-              <span>◈ Free Panel — free.legacycloud.fun</span><span>↗</span>
+              <span>◈ Free Panel</span><span>↗</span>
             </a>
             <button class="btn btn-discord" style="justify-content:space-between" onclick="openDiscord()">
               <span>◉ Discord Community</span><span>↗</span>
@@ -479,784 +1922,124 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
       <div class="server-grid" id="server-list"></div>
     </div>
 
-    <!-- ═══ CREATE SERVER ═══ -->
-    <div class="tab-content" id="tab-create">
-      <div class="sec-header"><div class="sec-title">DEPLOY SERVER</div></div>
-      <div style="max-width:580px">
-        <div class="card">
-          <div class="card-header"><div class="card-title">⚡ Configuration</div></div>
-          <div class="card-body">
-            <div class="form-row">
-              <div class="form-group"><label class="form-label">Server Name</label><input class="form-input" id="n-name" placeholder="my-mc-server"/></div>
-              <div class="form-group"><label class="form-label">Server Type</label><select class="form-input" id="n-egg"><option value="1">Minecraft Java</option><option value="2">Minecraft Bedrock</option><option value="3">Discord Bot (Node.js)</option><option value="4">Discord Bot (Python)</option><option value="5">Web App (Node.js)</option><option value="6">Source Game Server</option><option value="7">Rust Server</option><option value="8">ARK: Survival</option></select></div>
-            </div>
-            <div class="form-row">
-              <div class="form-group"><label class="form-label">RAM (MB)</label><input class="form-input" id="n-ram" type="number" value="1024"/></div>
-              <div class="form-group"><label class="form-label">Disk (MB)</label><input class="form-input" id="n-disk" type="number" value="5000"/></div>
-            </div>
-            <div class="form-row">
-              <div class="form-group"><label class="form-label">CPU Limit (%)</label><input class="form-input" id="n-cpu" type="number" value="100"/></div>
-              <div class="form-group"><label class="form-label">Node</label><select class="form-input" id="n-node"><option>US East — New York</option><option>US West — Los Angeles</option><option>EU — Frankfurt</option><option>EU — London</option><option>Asia — Singapore</option></select></div>
-            </div>
-            <div class="form-group"><label class="form-label">Panel Target</label><select class="form-input" id="n-panel"><option value="paid">Paid Panel (paid.legacycloud.fun)</option><option value="free">Free Panel (free.legacycloud.fun)</option></select></div>
-            <div class="notice notice-info" style="margin-bottom:14px">✦ Server deployment costs <strong>200 coins</strong> · Balance: <strong id="create-bal">0</strong></div>
-            <button class="btn btn-primary" style="width:100%;justify-content:center;padding:12px;font-size:12px" onclick="createServer()">⚡ DEPLOY SERVER</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ NODES ═══ -->
-    <div class="tab-content" id="tab-nodes">
-      <div class="sec-header"><div class="sec-title">NODE MANAGER</div><button class="btn btn-ghost" style="font-size:9px;padding:5px 12px" onclick="renderNodes()">↻ REFRESH</button></div>
-      <div class="notice notice-warn" id="node-notice">◈ Live node data requires Pterodactyl root_admin API key · Showing demo nodes</div>
-      <div id="node-list"></div>
-    </div>
-
-    <!-- ═══ STATUS ═══ -->
-    <div class="tab-content" id="tab-status">
-      <div class="sec-header"><div class="sec-title">SYSTEM STATUS</div><span class="pill pill-green" style="font-size:10px">All Systems Operational</span></div>
-      <div class="card" style="margin-bottom:14px">
-        <div class="card-header"><div class="card-title">◉ Services</div><span style="font-size:9px;color:var(--text3);letter-spacing:1px">LIVE · LAST 30 DAYS</span></div>
-        <div class="card-body" id="status-services"></div>
-      </div>
-      <div class="card" style="margin-bottom:14px">
-        <div class="card-header"><div class="card-title">◈ Node Health</div></div>
-        <div class="card-body" id="status-nodes"></div>
-      </div>
-      <div class="card">
-        <div class="card-header"><div class="card-title">◻ Incident History</div></div>
-        <div class="card-body">
-          <div class="act-item"><div class="act-dot" style="background:var(--green)"></div><div class="act-text"><strong>[RESOLVED]</strong> EU Frankfurt node — brief packet loss (5min)</div><div class="act-time">Jun 3</div></div>
-          <div class="act-item"><div class="act-dot" style="background:var(--green)"></div><div class="act-text"><strong>[RESOLVED]</strong> Pterodactyl API — elevated response times</div><div class="act-time">May 28</div></div>
-          <div class="act-item"><div class="act-dot" style="background:var(--green)"></div><div class="act-text"><strong>[RESOLVED]</strong> Discord bot — OAuth token refresh</div><div class="act-time">May 15</div></div>
-          <div class="act-item"><div class="act-dot" style="background:var(--text3)"></div><div class="act-text" style="color:var(--text3)">No incidents reported in past 60 days ✓</div><div class="act-time"></div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ COINS ═══ -->
-    <div class="tab-content" id="tab-coins">
-      <div class="sec-header"><div class="sec-title">LEGACY COINS</div><div class="tb-coins" style="font-size:14px">✦ <span id="coins-bal-display">0</span></div></div>
-      <div class="g2" style="margin-bottom:16px">
-        <div class="card">
-          <div class="card-header"><div class="card-title">✦ Purchase Coins</div></div>
-          <div class="card-body">
-            <div class="coin-shop">
-              <div class="coin-pkg" onclick="buyCoin(100,1)"><div class="coin-amt">100</div><div class="coin-price">$1.00</div><button class="btn btn-ghost" style="font-size:10px;padding:4px 12px;width:100%">Buy</button></div>
-              <div class="coin-pkg featured" onclick="buyCoin(550,5)"><div class="coin-amt">550</div><div class="coin-price">$5.00 <span style="color:var(--green);font-size:9px">+10%</span></div><button class="btn btn-gold" style="font-size:10px;padding:4px 12px;width:100%">Best Value</button></div>
-              <div class="coin-pkg" onclick="buyCoin(1200,10)"><div class="coin-amt">1200</div><div class="coin-price">$10.00 <span style="color:var(--green);font-size:9px">+20%</span></div><button class="btn btn-ghost" style="font-size:10px;padding:4px 12px;width:100%">Buy</button></div>
-            </div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-header"><div class="card-title">✦ Earn Coins</div></div>
-          <div class="card-body">
-            <div class="earn-row"><div><div style="font-size:12px;font-weight:600">Daily Login</div><div style="font-size:10px;color:var(--text3)">Claim every 24h</div></div><div style="display:flex;align-items:center;gap:8px"><span class="pill pill-gold">+50</span><button class="btn btn-gold" style="font-size:10px;padding:4px 10px" onclick="claimDaily()">Claim</button></div></div>
-            <div class="earn-row"><div><div style="font-size:12px;font-weight:600">Join Discord</div><div style="font-size:10px;color:var(--text3)">Link your account</div></div><button class="btn btn-discord" style="font-size:10px;padding:4px 10px" onclick="claimDiscord()">+100 ◉</button></div>
-            <div class="earn-row"><div><div style="font-size:12px;font-weight:600">Refer a Friend</div><div style="font-size:10px;color:var(--text3)">Friend buys a plan</div></div><span class="pill pill-gold">+200</span></div>
-            <div class="earn-row"><div><div style="font-size:12px;font-weight:600">Plan Purchase</div><div style="font-size:10px;color:var(--text3)">Per $1 spent</div></div><span class="pill pill-gold">+10</span></div>
-          </div>
-        </div>
-      </div>
-      <div class="card" style="margin-bottom:16px">
-        <div class="card-header"><div class="card-title">✦ Spend Coins</div></div>
-        <div class="card-body">
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
-            <div class="coin-pkg" onclick="spend('server_slot',200)"><div style="font-size:24px;margin-bottom:6px">⚡</div><div style="font-size:11px;font-weight:600;margin-bottom:4px">Extra Server</div><div style="font-size:10px;color:var(--text3);margin-bottom:10px">+1 slot</div><button class="btn btn-gold" style="font-size:9px;padding:4px 10px;width:100%">200 Coins</button></div>
-            <div class="coin-pkg" onclick="spend('ram_boost',150)"><div style="font-size:24px;margin-bottom:6px">◈</div><div style="font-size:11px;font-weight:600;margin-bottom:4px">+512MB RAM</div><div style="font-size:10px;color:var(--text3);margin-bottom:10px">Boost server</div><button class="btn btn-gold" style="font-size:9px;padding:4px 10px;width:100%">150 Coins</button></div>
-            <div class="coin-pkg" onclick="spend('backup',100)"><div style="font-size:24px;margin-bottom:6px">◻</div><div style="font-size:11px;font-weight:600;margin-bottom:4px">Backup Slot</div><div style="font-size:10px;color:var(--text3);margin-bottom:10px">+1 backup</div><button class="btn btn-gold" style="font-size:9px;padding:4px 10px;width:100%">100 Coins</button></div>
-            <div class="coin-pkg" onclick="spend('disk_boost',120)"><div style="font-size:24px;margin-bottom:6px">▣</div><div style="font-size:11px;font-weight:600;margin-bottom:4px">+5GB Disk</div><div style="font-size:10px;color:var(--text3);margin-bottom:10px">Expand storage</div><button class="btn btn-gold" style="font-size:9px;padding:4px 10px;width:100%">120 Coins</button></div>
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-header"><div class="card-title">✦ Transaction History</div></div>
-        <div class="card-body" style="padding:0"><table class="tbl"><thead><tr><th>Event</th><th>Amount</th><th>Balance</th><th>Date</th></tr></thead><tbody id="coin-hist"></tbody></table></div>
-      </div>
-    </div>
-
-    <!-- ═══ STORE ═══ -->
-    <div class="tab-content" id="tab-store">
-      <div class="sec-header"><div class="sec-title">RESOURCE STORE</div></div>
-      <div class="notice notice-info">✦ All purchases are charged to your Legacy Coins balance</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
-        <div class="card"><div class="card-header"><div class="card-title">◈ Memory Upgrades</div></div><div class="card-body" style="display:flex;flex-direction:column;gap:8px">
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:12px;font-weight:600">+256MB RAM</div><div style="font-size:10px;color:var(--text3)">Per server</div></div><button class="btn btn-gold" style="font-size:9px;padding:4px 10px" onclick="spend('ram256',80)">80 ✦</button></div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:12px;font-weight:600">+512MB RAM</div><div style="font-size:10px;color:var(--text3)">Per server</div></div><button class="btn btn-gold" style="font-size:9px;padding:4px 10px" onclick="spend('ram512',150)">150 ✦</button></div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0"><div><div style="font-size:12px;font-weight:600">+1GB RAM</div><div style="font-size:10px;color:var(--text3)">Per server</div></div><button class="btn btn-gold" style="font-size:9px;padding:4px 10px" onclick="spend('ram1024',280)">280 ✦</button></div>
-        </div></div>
-        <div class="card"><div class="card-header"><div class="card-title">▣ Storage Upgrades</div></div><div class="card-body" style="display:flex;flex-direction:column;gap:8px">
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:12px;font-weight:600">+1GB Disk</div><div style="font-size:10px;color:var(--text3)">Per server</div></div><button class="btn btn-gold" style="font-size:9px;padding:4px 10px" onclick="spend('disk1',25)">25 ✦</button></div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:12px;font-weight:600">+5GB Disk</div><div style="font-size:10px;color:var(--text3)">Per server</div></div><button class="btn btn-gold" style="font-size:9px;padding:4px 10px" onclick="spend('disk5',120)">120 ✦</button></div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0"><div><div style="font-size:12px;font-weight:600">+20GB Disk</div><div style="font-size:10px;color:var(--text3)">Per server</div></div><button class="btn btn-gold" style="font-size:9px;padding:4px 10px" onclick="spend('disk20',450)">450 ✦</button></div>
-        </div></div>
-        <div class="card"><div class="card-header"><div class="card-title">⚡ Server Slots</div></div><div class="card-body" style="display:flex;flex-direction:column;gap:8px">
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:12px;font-weight:600">+1 Server Slot</div><div style="font-size:10px;color:var(--text3)">Permanent</div></div><button class="btn btn-gold" style="font-size:9px;padding:4px 10px" onclick="spend('slot',200)">200 ✦</button></div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:12px;font-weight:600">+1 Backup</div><div style="font-size:10px;color:var(--text3)">Permanent</div></div><button class="btn btn-gold" style="font-size:9px;padding:4px 10px" onclick="spend('backup',100)">100 ✦</button></div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0"><div><div style="font-size:12px;font-weight:600">+1 Port</div><div style="font-size:10px;color:var(--text3)">Extra allocation</div></div><button class="btn btn-gold" style="font-size:9px;padding:4px 10px" onclick="spend('port',50)">50 ✦</button></div>
-        </div></div>
-      </div>
-    </div>
-
-    <!-- ═══ BILLING ═══ -->
-    <div class="tab-content" id="tab-billing">
-      <div class="sec-header"><div class="sec-title">PLANS & BILLING</div></div>
-      <div class="plan-grid">
-        <div class="plan-card"><div class="plan-name">STARTER</div><div class="plan-price">$5<small>/mo</small></div><ul class="plan-feat"><li>1 Server</li><li>1GB RAM</li><li>10GB Disk</li><li>Basic Support</li><li>Discord Access</li><li>50 Coins/month</li></ul><button class="btn btn-ghost" style="width:100%;justify-content:center">Current Plan</button></div>
-        <div class="plan-card popular"><div class="pop-badge">POPULAR</div><div class="plan-name">PRO</div><div class="plan-price">$15<small>/mo</small></div><ul class="plan-feat"><li>5 Servers</li><li>4GB RAM each</li><li>50GB Disk</li><li>Priority Support</li><li>Discord Pro Role</li><li>Custom Domain</li><li>200 Coins/month</li></ul><button class="btn btn-primary" style="width:100%;justify-content:center">Upgrade</button></div>
-        <div class="plan-card"><div class="plan-name">ENTERPRISE</div><div class="plan-price">$49<small>/mo</small></div><ul class="plan-feat"><li>Unlimited Servers</li><li>16GB RAM each</li><li>500GB Disk</li><li>24/7 VIP Support</li><li>Dedicated Discord</li><li>SLA Guarantee</li><li>1000 Coins/month</li></ul><button class="btn btn-primary" style="width:100%;justify-content:center">Upgrade</button></div>
-      </div>
-    </div>
-
-    <!-- ═══ INVOICES ═══ -->
-    <div class="tab-content" id="tab-invoices">
-      <div class="sec-header"><div class="sec-title">INVOICES</div></div>
-      <div class="card"><table class="tbl"><thead><tr><th>Invoice</th><th>Description</th><th>Date</th><th>Amount</th><th>Status</th><th></th></tr></thead><tbody>
-        <tr><td>#INV-0042</td><td>Pro Plan — June 2025</td><td>Jun 1, 2025</td><td>$15.00</td><td><span class="pill pill-green">PAID</span></td><td><button class="btn btn-ghost" style="font-size:9px;padding:4px 8px">↓ PDF</button></td></tr>
-        <tr><td>#INV-0041</td><td>Pro Plan — May 2025</td><td>May 1, 2025</td><td>$15.00</td><td><span class="pill pill-green">PAID</span></td><td><button class="btn btn-ghost" style="font-size:9px;padding:4px 8px">↓ PDF</button></td></tr>
-        <tr><td>#INV-0040</td><td>Coins — 550 pack</td><td>Apr 14, 2025</td><td>$5.00</td><td><span class="pill pill-green">PAID</span></td><td><button class="btn btn-ghost" style="font-size:9px;padding:4px 8px">↓ PDF</button></td></tr>
-      </tbody></table></div>
-    </div>
-
-    <!-- ═══ DISCORD ═══ -->
-    <div class="tab-content" id="tab-discord">
-      <div class="sec-header"><div class="sec-title">DISCORD INTEGRATION</div></div>
-      <div class="dc-banner">
-        <div style="display:flex;align-items:center;gap:14px"><span style="font-size:40px">◉</span><div><div style="font-family:'Orbitron',monospace;font-size:14px;font-weight:700;color:#818cf8">Legacy Cloud Community</div><div style="font-size:11px;color:var(--text2);margin-top:3px">Support · Updates · Announcements</div></div></div>
-        <div style="display:flex;gap:20px"><div style="text-align:center"><div style="font-family:'Orbitron',monospace;font-size:22px;font-weight:900;color:#818cf8" id="dc-members">—</div><div style="font-size:9px;color:var(--text3);letter-spacing:1px">MEMBERS</div></div><div style="text-align:center"><div style="font-family:'Orbitron',monospace;font-size:22px;font-weight:900;color:var(--green)" id="dc-online">—</div><div style="font-size:9px;color:var(--text3);letter-spacing:1px">ONLINE</div></div></div>
-        <button class="btn btn-discord" onclick="openDiscord()" style="padding:10px 20px">Open Server ↗</button>
-      </div>
-      <div class="g2">
-        <div class="card"><div class="card-header"><div class="card-title">◉ Bot Configuration</div></div><div class="card-body">
-          <div class="form-group"><label class="form-label">Bot Token</label><input class="form-input" id="dc-token" type="password" placeholder="••••••••••••••••••••••••••"/></div>
-          <div class="form-group"><label class="form-label">Guild / Server ID</label><input class="form-input" id="dc-guild" placeholder="123456789012345678"/></div>
-          <div class="form-group"><label class="form-label">Invite Link</label><input class="form-input" id="dc-invite" placeholder="https://discord.gg/yourcode"/></div>
-          <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="saveDC()">Save & Connect</button>
-        </div></div>
-        <div class="card"><div class="card-header"><div class="card-title">◉ Bot Actions</div></div><div class="card-body" style="display:flex;flex-direction:column;gap:7px">
-          <button class="btn btn-ghost" style="width:100%;justify-content:flex-start" onclick="botAct('verify')">✓ Send Verification</button>
-          <button class="btn btn-ghost" style="width:100%;justify-content:flex-start" onclick="botAct('roles')">⬡ Sync Customer Roles</button>
-          <button class="btn btn-ghost" style="width:100%;justify-content:flex-start" onclick="botAct('announce')">◻ Post Announcement</button>
-          <button class="btn btn-ghost" style="width:100%;justify-content:flex-start" onclick="botAct('status')">⚡ Post Status Update</button>
-          <button class="btn btn-ghost" style="width:100%;justify-content:flex-start" onclick="botAct('coins')">✦ Post Coin Reward</button>
-        </div></div>
-      </div>
-    </div>
-
-    <!-- ═══ SETTINGS ═══ -->
-    <div class="tab-content" id="tab-settings">
-      <div class="sec-header"><div class="sec-title">API SETTINGS</div></div>
-      <div style="max-width:600px;display:flex;flex-direction:column;gap:14px">
-        <div class="card"><div class="card-header"><div class="card-title">⚡ Pterodactyl — Paid Panel</div></div><div class="card-body">
-          <div class="notice notice-green" style="margin-bottom:14px">🛡 Admin status is auto-detected via root_admin flag in the Pterodactyl API</div>
-          <div class="form-group"><label class="form-label">Panel URL</label><input class="form-input" id="pt-url" value="https://paid.legacycloud.fun" placeholder="https://paid.legacycloud.fun"/></div>
-          <div class="form-group"><label class="form-label">Application API Key</label><input class="form-input" id="pt-key" type="password" placeholder="ptla_••••••••••••••••••••••••••••••••"/></div>
-          <div class="form-group"><label class="form-label">Client API Key</label><input class="form-input" id="pt-ckey" type="password" placeholder="ptlc_••••••••••••••••••••••••••••••••"/></div>
-          <div style="display:flex;gap:10px"><button class="btn btn-primary" onclick="savePtero()" style="flex:1;justify-content:center">Test & Save Connection</button><button class="btn btn-ghost" onclick="openPaidPanel()">Open Panel ↗</button></div>
-        </div></div>
-        <div class="card"><div class="card-header"><div class="card-title">◈ Pterodactyl — Free Panel</div></div><div class="card-body">
-          <div class="form-group"><label class="form-label">Free Panel URL</label><input class="form-input" id="pt-free-url" value="https://free.legacycloud.fun" placeholder="https://free.legacycloud.fun"/></div>
-          <div class="form-group"><label class="form-label">Application API Key</label><input class="form-input" id="pt-free-key" type="password" placeholder="ptla_••••••••••••••••••••••••••••••••"/></div>
-          <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="saveFreePanel()">Save Free Panel</button>
-        </div></div>
-        <div class="card"><div class="card-header"><div class="card-title">◈ Stripe Payments</div></div><div class="card-body">
-          <div class="form-group"><label class="form-label">Publishable Key</label><input class="form-input" placeholder="pk_live_••••••••••••••••••••"/></div>
-          <div class="form-group"><label class="form-label">Secret Key</label><input class="form-input" type="password" placeholder="sk_live_••••••••••••••••••••"/></div>
-          <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="toast('Stripe keys saved!','success')">Save Keys</button>
-        </div></div>
-      </div>
-    </div>
-
-    <!-- ═══ ADMIN PANEL ═══ -->
-    <div class="tab-content" id="tab-admin">
-      <div id="admin-main-content"></div>
-    </div>
-
-    <!-- ═══ ADMIN USERS ═══ -->
-    <div class="tab-content" id="tab-admin-users">
-      <div id="admin-users-content"></div>
-    </div>
-
-    <!-- ═══ ADMIN COINS ═══ -->
-    <div class="tab-content" id="tab-admin-coins">
-      <div id="admin-coins-content"></div>
-    </div>
-
-    <!-- ═══ ADMIN SYS ═══ -->
-    <div class="tab-content" id="tab-admin-sys">
-      <div id="admin-sys-content"></div>
-    </div>
-
   </div>
 </main>
 
-<!-- TOAST -->
-<div class="toast" id="toast"><span id="t-icon">✓</span><span id="t-msg">Done</span></div>
-
-<!-- BUY MODAL -->
-<div class="modal-overlay" id="buy-modal">
-  <div class="modal">
-    <div class="modal-title">✦ Purchase Coins<button class="close-btn" onclick="closeModal('buy-modal')">✕</button></div>
-    <div style="font-size:12px;color:var(--text2);margin-bottom:20px;letter-spacing:.3px">Purchasing <strong id="m-amt" style="color:var(--gold)">0 Coins</strong> for <strong id="m-price">$0.00</strong></div>
-    <div class="form-group"><label class="form-label">Card Number</label><input class="form-input" placeholder="4242 4242 4242 4242" maxlength="19"/></div>
-    <div class="form-row"><div class="form-group"><label class="form-label">Expiry</label><input class="form-input" placeholder="MM/YY" maxlength="5"/></div><div class="form-group"><label class="form-label">CVC</label><input class="form-input" placeholder="123" maxlength="3"/></div></div>
-    <button class="btn btn-gold" style="width:100%;justify-content:center;padding:12px;margin-top:4px" onclick="confirmBuy()">✦ Complete Purchase</button>
-  </div>
-</div>
-
 <script>
-// ═══════ ANTI-COPY ═══════
-document.addEventListener('contextmenu',e=>{e.preventDefault();toast('⊘ Right-click disabled','error')});
-document.addEventListener('keydown',e=>{
-  if((e.ctrlKey||e.metaKey)&&['s','u','c','a','p','i','j'].includes(e.key.toLowerCase())){e.preventDefault();toast('⊘ Shortcut disabled on Legacy Cloud','error')}
-  if([123,122].includes(e.keyCode)||(e.ctrlKey&&e.shiftKey&&['i','j','c'].includes(e.key.toLowerCase()))){e.preventDefault();toast('⊘ DevTools disabled','error')}
-});
-document.addEventListener('copy',e=>e.preventDefault());
-document.addEventListener('cut',e=>e.preventDefault());
-document.addEventListener('dragstart',e=>e.preventDefault());
-document.addEventListener('selectstart',e=>e.preventDefault());
+// ═══ MOBILE RESPONSIVE & BACKGROUND SUPPORT ═══
 
-// ═══════ STATE ═══════
-const C={
-  pteroUrl:localStorage.getItem('pt_url')||'https://paid.legacycloud.fun',
-  pteroKey:localStorage.getItem('pt_key')||'',
-  pteroClientKey:localStorage.getItem('pt_ckey')||'',
-  freePanelUrl:localStorage.getItem('pt_free_url')||'https://free.legacycloud.fun',
-  freePanelKey:localStorage.getItem('pt_free_key')||'',
-  dcToken:localStorage.getItem('dc_tok')||'',
-  dcGuild:localStorage.getItem('dc_guild')||'',
-  dcInvite:localStorage.getItem('dc_invite')||'https://discord.gg/YOUR_INVITE',
+// Background Configuration
+const backgroundConfig = {
+  type: localStorage.getItem('bgType') || '1', // 1=image, 2=video, 3=gradient
+  imageUrl: localStorage.getItem('bgImageUrl') || 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1920&h=1080&fit=crop',
+  videoUrl: localStorage.getItem('bgVideoUrl') || '',
+  videoType: localStorage.getItem('bgVideoType') || 'mp4',
+  overlayOpacity: parseFloat(localStorage.getItem('overlayOpacity') || '0.75'),
+  blurEffect: localStorage.getItem('blurEffect') !== 'false'
 };
 
-let isAdmin=false;
-let coins=parseInt(localStorage.getItem('lc_coins')||'250');
-let pending={amt:0,usd:0};
-let coinHist=JSON.parse(localStorage.getItem('lc_hist')||'[]');
-if(!coinHist.length)coinHist=[{e:'Welcome Bonus',a:'+250',b:250,d:'Jun 7, 2025'},{e:'Daily Login',a:'+50',b:300,d:'Jun 6, 2025'}];
-
-let servers=[
-  {id:'s1',name:'mc-survival',status:'running',type:'Minecraft Java',ram:2048,ramUsed:1400,disk:10240,diskUsed:4200,cpu:45,panel:'paid'},
-  {id:'s2',name:'discord-bot',status:'running',type:'Discord Bot',ram:512,ramUsed:180,disk:2048,diskUsed:320,cpu:8,panel:'free'},
-  {id:'s3',name:'web-app',status:'offline',type:'Node.js App',ram:1024,ramUsed:0,disk:5120,diskUsed:1100,cpu:0,panel:'paid'},
-];
-
-const demoNodes=[
-  {id:'n1',name:'US-EAST-01',loc:'New York, USA 🇺🇸',status:'online',cpu:42,ram:68,disk:55,servers:12,uptime:'99.98%',ping:'8ms'},
-  {id:'n2',name:'EU-FRANKFURT-01',loc:'Frankfurt, Germany 🇩🇪',status:'online',cpu:31,ram:54,disk:40,servers:8,uptime:'99.95%',ping:'12ms'},
-  {id:'n3',name:'US-WEST-01',loc:'Los Angeles, USA 🇺🇸',status:'online',cpu:18,ram:35,disk:22,servers:5,uptime:'100%',ping:'5ms'},
-  {id:'n4',name:'ASIA-SG-01',loc:'Singapore 🇸🇬',status:'maintenance',cpu:0,ram:0,disk:30,servers:0,uptime:'99.90%',ping:'—'},
-  {id:'n5',name:'EU-LONDON-01',loc:'London, UK 🇬🇧',status:'online',cpu:22,ram:44,disk:33,servers:6,uptime:'99.99%',ping:'9ms'},
-];
-
-const demoSvcs=[
-  {n:'Panel — paid.legacycloud.fun',s:'operational',up:99.9,h:[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]},
-  {n:'Panel — free.legacycloud.fun',s:'operational',up:99.8,h:[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1]},
-  {n:'Game Node Network',s:'operational',up:99.7,h:[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]},
-  {n:'Discord Bot',s:'operational',up:100,h:[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]},
-  {n:'Billing & Coins API',s:'operational',up:100,h:[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]},
-  {n:'Dashboard API',s:'operational',up:99.6,h:[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1]},
-];
-
-const adminUsers=[
-  {id:1,name:'AdminUser',email:'admin@legacycloud.net',plan:'Enterprise',coins:5000,servers:12,admin:true,status:'active',joined:'Jan 1, 2025'},
-  {id:2,name:'JohnDoe',email:'john@example.com',plan:'Pro',coins:320,servers:3,admin:false,status:'active',joined:'Feb 14, 2025'},
-  {id:3,name:'GamerXYZ',email:'gamer@example.com',plan:'Starter',coins:80,servers:1,admin:false,status:'active',joined:'Mar 20, 2025'},
-  {id:4,name:'DevStudio',email:'dev@studio.io',plan:'Enterprise',coins:1200,servers:8,admin:false,status:'suspended',joined:'Apr 5, 2025'},
-  {id:5,name:'CloudNine',email:'cloud9@host.com',plan:'Pro',coins:550,servers:4,admin:false,status:'active',joined:'May 1, 2025'},
-];
-
-// ═══════ COINS ═══════
-function updateCoins(){
-  ['tb-coins','sb-coins','s-coins','coins-bal-display','create-bal','coin-nav-badge'].forEach(id=>{
-    const el=document.getElementById(id);if(el)el.textContent=coins;
-  });
-  localStorage.setItem('lc_coins',coins);
-}
-function addCoins(amt,reason){
-  coins+=amt;
-  const d=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-  coinHist.unshift({e:reason,a:'+'+amt,b:coins,d});
-  localStorage.setItem('lc_hist',JSON.stringify(coinHist.slice(0,100)));
-  updateCoins();renderCoinHist();
-  toast(`+${amt} coins: ${reason}`,'gold');
-}
-function spendCoins(amt,reason){
-  if(coins<amt){toast(`Need ${amt} coins (have ${coins})`,'error');return false}
-  coins-=amt;
-  const d=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-  coinHist.unshift({e:reason,a:'-'+amt,b:coins,d});
-  localStorage.setItem('lc_hist',JSON.stringify(coinHist.slice(0,100)));
-  updateCoins();renderCoinHist();return true;
-}
-function spend(type,cost){
-  const labels={server_slot:'Extra Server Slot',ram_boost:'+512MB RAM',backup:'Backup Slot',disk_boost:'+5GB Disk',ram256:'+256MB RAM',ram512:'+512MB RAM',ram1024:'+1GB RAM',disk1:'+1GB Disk',disk5:'+5GB Disk',disk20:'+20GB Disk',slot:'Server Slot',port:'+1 Port'};
-  if(spendCoins(cost,labels[type]||type)){toast(`Purchased: ${labels[type]||type}! -${cost} coins`,'success')}
-}
-function renderCoinHist(){
-  const el=document.getElementById('coin-hist');if(!el)return;
-  el.innerHTML=coinHist.map(h=>`<tr><td>${h.e}</td><td style="color:${h.a.startsWith('+')? 'var(--green)':'var(--red)'};font-weight:700">${h.a}</td><td>${h.b}</td><td style="color:var(--text3)">${h.d}</td></tr>`).join('');
-}
-function claimDaily(){
-  const last=localStorage.getItem('lc_daily');
-  const today=new Date().toDateString();
-  if(last===today){toast('Daily coins already claimed today!','error');return}
-  localStorage.setItem('lc_daily',today);addCoins(50,'Daily Login Bonus');
-}
-function claimDiscord(){
-  if(localStorage.getItem('lc_dc_claimed')){toast('Discord bonus already claimed!','error');return}
-  localStorage.setItem('lc_dc_claimed','1');addCoins(100,'Discord Link Bonus');
-}
-function buyCoin(amt,usd){
-  pending={amt,usd};
-  document.getElementById('m-amt').textContent=amt+' Coins';
-  document.getElementById('m-price').textContent='$'+usd.toFixed(2);
-  document.getElementById('buy-modal').classList.add('open');
-}
-function confirmBuy(){
-  closeModal('buy-modal');
-  addCoins(pending.amt,'Coin Purchase ($'+pending.usd.toFixed(2)+')');
-}
-
-// ═══════ TAB NAVIGATION ═══════
-const titles={overview:'DASHBOARD',servers:'MY SERVERS',create:'DEPLOY SERVER',nodes:'NODE MANAGER',status:'SYSTEM STATUS',coins:'LEGACY COINS',store:'RESOURCE STORE',billing:'PLANS & BILLING',invoices:'INVOICES',discord:'DISCORD',settings:'API SETTINGS',admin:'ADMIN PANEL','admin-users':'USER MANAGER','admin-coins':'COIN CONTROL','admin-sys':'SYSTEM MONITOR'};
-const bcs={overview:'Overview',servers:'Servers',create:'Servers › Deploy',nodes:'Infrastructure › Nodes',status:'Infrastructure › Status',coins:'Economy › Coins',store:'Economy › Store',billing:'Billing',invoices:'Billing › Invoices',discord:'Community › Discord',settings:'System › Settings',admin:'Admin › Overview','admin-users':'Admin › Users','admin-coins':'Admin › Coins','admin-sys':'Admin › System'};
-
-function showTab(name,el){
-  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  const tab=document.getElementById('tab-'+name);
-  if(tab)tab.classList.add('active');
-  if(el)el.classList.add('active');
-  document.getElementById('page-title').textContent=titles[name]||name.toUpperCase();
-  document.getElementById('page-bc').textContent=bcs[name]||name;
-  if(name==='servers')renderServers();
-  if(name==='overview')renderOv();
-  if(name==='nodes')renderNodes();
-  if(name==='status')renderStatus();
-  if(name==='coins')renderCoinHist();
-  if(name==='admin')renderAdmin();
-  if(name==='admin-users')renderAdminUsers();
-  if(name==='admin-coins')renderAdminCoins();
-  if(name==='admin-sys')renderAdminSys();
-}
-
-// ═══════ SERVERS ═══════
-function sdot(s){return s==='running'?'sd-online':s==='starting'?'sd-starting':'sd-offline'}
-function sc(s){return s==='running'?'s-online':s==='starting'?'s-starting':'s-offline'}
-function pill(s){return s==='running'?'pill-green':s==='starting'?'pill-yellow':'pill-red'}
-function panelTag(p){return p==='paid'?`<span class="pill pill-gold" style="font-size:8px">PAID</span>`:`<span class="pill pill-blue" style="font-size:8px">FREE</span>`}
-
-function renderServerCard(s){
-  const rp=s.ram?Math.round(s.ramUsed/s.ram*100):0;
-  const dp=s.disk?Math.round(s.diskUsed/s.disk*100):0;
-  const rc=rp>80?'crit':rp>60?'warn':'ok';
-  const pc=rp>80?'pb-red':'pb-blue';
-  return `<div class="server-card ${sc(s.status)}">
-    <div class="server-top">
-      <div class="server-dot ${sdot(s.status)}"></div>
-      <div style="flex:1">
-        <div style="display:flex;align-items:center;gap:8px">
-          <div class="server-name">${s.name}</div>
-          ${panelTag(s.panel)}
-          <span class="pill ${pill(s.status)}">${s.status.toUpperCase()}</span>
-        </div>
-        <div class="server-type">${s.type}</div>
-      </div>
-      <div class="server-actions">
-        <button class="btn btn-green" style="font-size:9px;padding:5px 9px" onclick="sAct('${s.id}','start')">▶ START</button>
-        <button class="btn btn-ghost" style="font-size:9px;padding:5px 9px" onclick="sAct('${s.id}','restart')">↻ RESTART</button>
-        <button class="btn btn-danger" style="font-size:9px;padding:5px 9px" onclick="sAct('${s.id}','stop')">■ STOP</button>
-        <button class="btn btn-primary" style="font-size:9px;padding:5px 10px" onclick="openConsole('${s.id}','${s.panel}')">CONSOLE ↗</button>
-      </div>
-    </div>
-    <div class="server-metrics">
-      <div class="metric"><div class="metric-label">RAM</div><div class="metric-val ${rc}">${s.status==='running'?s.ramUsed:0} / ${s.ram} MB</div><div class="pbar"><div class="pbar-fill ${pc}" style="width:${s.status==='running'?rp:0}%"></div></div></div>
-      <div class="metric"><div class="metric-label">DISK</div><div class="metric-val ok">${s.diskUsed} / ${s.disk} MB</div><div class="pbar"><div class="pbar-fill pb-green" style="width:${dp}%"></div></div></div>
-      <div class="metric"><div class="metric-label">CPU</div><div class="metric-val ${s.cpu>80?'crit':s.cpu>50?'warn':'ok'}">${s.status==='running'?s.cpu:0}%</div><div class="pbar"><div class="pbar-fill pb-blue" style="width:${s.status==='running'?s.cpu:0}%"></div></div></div>
-    </div>
-  </div>`;
-}
-function renderServers(){const el=document.getElementById('server-list');if(el)el.innerHTML=servers.map(renderServerCard).join('')}
-function renderOv(){
-  const el=document.getElementById('ov-servers');if(!el)return;
-  el.innerHTML=servers.map(s=>`<div class="act-item"><div class="act-dot ${sdot(s.status)}"></div><div class="act-text"><strong>${s.name}</strong> · ${s.type}</div><div style="display:flex;gap:6px;align-items:center">${panelTag(s.panel)}<span class="pill ${pill(s.status)}" style="font-size:8px">${s.status}</span></div></div>`).join('');
-  document.getElementById('s-active').textContent=servers.filter(x=>x.status==='running').length;
-  document.getElementById('server-badge').textContent=servers.length;
-}
-function refreshOv(){renderOv();toast('Servers refreshed','success')}
-
-function sAct(id,act){
-  const s=servers.find(x=>x.id===id);if(!s)return;
-  if(act==='start'){s.status='starting';setTimeout(()=>{s.status='running';s.ramUsed=Math.round(s.ram*.35);s.cpu=Math.round(Math.random()*30+8);renderServers();renderOv();},2200);}
-  if(act==='stop'){s.status='offline';s.cpu=0;s.ramUsed=0;}
-  if(act==='restart'){s.status='starting';setTimeout(()=>{s.status='running';renderServers();renderOv();},2500);}
-  renderServers();renderOv();
-  toast(`${act.toUpperCase()} sent to ${s.name}`,'success');
-  if(C.pteroClientKey){
-    const sig={start:'start',stop:'kill',restart:'restart'}[act];
-    if(sig){const url=s.panel==='free'?C.freePanelUrl:C.pteroUrl;fetch(`${url}/api/client/servers/${id}/power`,{method:'POST',headers:{'Authorization':`Bearer ${C.pteroClientKey}`,'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({signal:sig})}).catch(()=>{});}
+// Apply background on load
+function applyBackground() {
+  const body = document.body;
+  const html = document.documentElement;
+  
+  if (backgroundConfig.type === '1') {
+    // Image background
+    body.style.setProperty('--bg-image', `url('${backgroundConfig.imageUrl}')`);
+  } else if (backgroundConfig.type === '2') {
+    // Video background
+    const videoElement = document.createElement('video');
+    videoElement.className = 'video-bg';
+    videoElement.autoplay = true;
+    videoElement.loop = true;
+    videoElement.muted = true;
+    videoElement.playsInline = true;
+    
+    const source = document.createElement('source');
+    source.src = backgroundConfig.videoUrl;
+    source.type = `video/${backgroundConfig.videoType === 'webm' ? 'webm' : 'mp4'}`;
+    videoElement.appendChild(source);
+    
+    body.insertBefore(videoElement, body.firstChild);
   }
-}
-function openConsole(id,panel){
-  const url=panel==='free'?C.freePanelUrl:C.pteroUrl;
-  if(url)window.open(`${url}/server/${id}`,'_blank');
-  else toast('Set panel URL in Settings first','error');
-}
-
-async function createServer(){
-  const name=document.getElementById('n-name').value.trim();
-  const ram=parseInt(document.getElementById('n-ram').value)||1024;
-  const disk=parseInt(document.getElementById('n-disk').value)||5000;
-  const cpu=parseInt(document.getElementById('n-cpu').value)||100;
-  const panel=document.getElementById('n-panel').value;
-  const eggEl=document.getElementById('n-egg');
-  const type=eggEl.options[eggEl.selectedIndex].text;
-  if(!name){toast('Enter a server name','error');return}
-  if(!spendCoins(200,'Server Deploy: '+name)){return}
-  const ns={id:'s'+Date.now(),name,status:'starting',type,ram,ramUsed:0,disk,diskUsed:Math.round(disk*.1),cpu:0,panel};
-  servers.push(ns);
-  document.getElementById('server-badge').textContent=servers.length;
-  toast(`Deploying "${name}" on ${panel} panel...`,'success');
-  setTimeout(()=>{ns.status='running';ns.ramUsed=Math.round(ram*.3);ns.cpu=Math.round(Math.random()*20+8);renderOv();},3500);
-  showTab('servers',null);
-  const url=panel==='free'?C.freePanelUrl:C.pteroUrl;
-  const key=panel==='free'?C.freePanelKey:C.pteroKey;
-  if(url&&key){
-    try{
-      const r=await fetch(`${url}/api/application/servers`,{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({name,user:1,egg:parseInt(eggEl.value),docker_image:'ghcr.io/pterodactyl/yolks:java_17',startup:'java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar server.jar',environment:{MINECRAFT_VERSION:'latest',BUILD_NUMBER:'latest',STARTUP_JAR:'server.jar'},limits:{memory:ram,swap:0,disk,io:500,cpu},feature_limits:{databases:0,backups:1,allocations:1}})});
-      if(r.ok)toast(`Server live on ${panel} panel!`,'success');
-    }catch(e){}
-  }
+  
+  // Apply overlay opacity
+  const overlay = document.createElement('style');
+  overlay.textContent = `body::after { background: rgba(3, 6, 15, ${backgroundConfig.overlayOpacity}) !important; }`;
+  document.head.appendChild(overlay);
 }
 
-// ═══════ NODES ═══════
-function renderNodes(){
-  const el=document.getElementById('node-list');if(!el)return;
-  el.innerHTML=demoNodes.map(n=>`
-    <div class="node-card">
-      <div class="node-head">
-        <div class="server-dot ${n.status==='online'?'sd-online':n.status==='maintenance'?'sd-starting':'sd-offline'}" style="width:10px;height:10px"></div>
-        <div style="flex:1"><div style="font-family:'Orbitron',monospace;font-size:13px;font-weight:700;letter-spacing:1px">${n.name}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${n.loc}</div></div>
-        <span class="pill ${n.status==='online'?'pill-green':n.status==='maintenance'?'pill-yellow':'pill-red'}">${n.status.toUpperCase()}</span>
-        <div style="margin-left:14px;text-align:right"><div style="font-size:9px;color:var(--text3);letter-spacing:1px">UPTIME</div><div style="font-size:13px;font-weight:700;color:var(--green)">${n.uptime}</div></div>
-        <div style="margin-left:14px;text-align:right"><div style="font-size:9px;color:var(--text3);letter-spacing:1px">PING</div><div style="font-size:13px;font-weight:700;color:var(--accent)">${n.ping}</div></div>
-      </div>
-      <div class="node-metrics">
-        <div class="metric"><div class="metric-label">Servers Hosted</div><div class="metric-val ok">${n.servers}</div><div class="pbar"><div class="pbar-fill pb-blue" style="width:${Math.min(n.servers*5,100)}%"></div></div></div>
-        <div class="metric"><div class="metric-label">CPU Usage</div><div class="metric-val ${n.cpu>80?'crit':n.cpu>50?'warn':'ok'}">${n.cpu}%</div><div class="pbar"><div class="pbar-fill ${n.cpu>80?'pb-red':n.cpu>50?'pb-yellow':'pb-blue'}" style="width:${n.cpu}%"></div></div></div>
-        <div class="metric"><div class="metric-label">RAM Usage</div><div class="metric-val ${n.ram>80?'crit':n.ram>60?'warn':'ok'}">${n.ram}%</div><div class="pbar"><div class="pbar-fill ${n.ram>80?'pb-red':'pb-green'}" style="width:${n.ram}%"></div></div></div>
-        <div class="metric"><div class="metric-label">Disk Usage</div><div class="metric-val ${n.disk>80?'crit':n.disk>60?'warn':'ok'}">${n.disk}%</div><div class="pbar"><div class="pbar-fill pb-green" style="width:${n.disk}%"></div></div></div>
-      </div>
-    </div>`).join('');
-}
-
-// ═══════ STATUS ═══════
-function renderStatus(){
-  const se=document.getElementById('status-services');
-  const ne=document.getElementById('status-nodes');
-  if(se)se.innerHTML=demoSvcs.map(s=>`
-    <div class="svc-row">
-      <div style="display:flex;align-items:center;gap:10px">
-        <div class="server-dot ${s.s==='operational'?'sd-online':'sd-starting'}" style="width:8px;height:8px"></div>
-        <div><div style="font-size:12px;font-weight:600">${s.n}</div><div style="font-size:9px;color:var(--text3);letter-spacing:1px">Uptime ${s.up}%</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <div class="hist-wrap">${s.h.map(h=>`<div class="hist-bar ${h===0?'down':h===2?'partial':''}" title="${h===1?'Operational':h===0?'Down':'Partial'}"></div>`).join('')}</div>
-        <span style="font-size:9px;color:var(--text3)">30d</span>
-        <span class="pill ${s.s==='operational'?'pill-green':'pill-yellow'}">${s.s.toUpperCase()}</span>
-      </div>
-    </div>`).join('');
-  if(ne)ne.innerHTML=demoNodes.map(n=>`
-    <div class="svc-row">
-      <div style="display:flex;align-items:center;gap:10px">
-        <div class="server-dot ${n.status==='online'?'sd-online':n.status==='maintenance'?'sd-starting':'sd-offline'}" style="width:8px;height:8px"></div>
-        <div><div style="font-size:12px;font-weight:600">${n.name}</div><div style="font-size:9px;color:var(--text3)">${n.loc}</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:12px">
-        <span style="font-size:11px;color:var(--text2)">CPU <strong style="color:${n.cpu>70?'var(--yellow)':'var(--text)'}">${n.cpu}%</strong></span>
-        <span style="font-size:11px;color:var(--text2)">RAM <strong style="color:${n.ram>70?'var(--yellow)':'var(--text)'}">${n.ram}%</strong></span>
-        <span style="font-size:11px;color:var(--text2)">Ping <strong style="color:var(--accent)">${n.ping}</strong></span>
-        <span class="pill ${n.status==='online'?'pill-green':n.status==='maintenance'?'pill-yellow':'pill-red'}">${n.status.toUpperCase()}</span>
-      </div>
-    </div>`).join('');
-}
-
-// ═══════ PTERODACTYL / ADMIN AUTH ═══════
-async function savePtero(){
-  const url=document.getElementById('pt-url').value.trim().replace(/\/$/,'');
-  const key=document.getElementById('pt-key').value.trim();
-  const ckey=document.getElementById('pt-ckey').value.trim();
-  if(!url||!key){toast('Enter panel URL and API key','error');return}
-  toast('Testing connection...','info');
-  C.pteroUrl=url;C.pteroKey=key;C.pteroClientKey=ckey;
-  localStorage.setItem('pt_url',url);localStorage.setItem('pt_key',key);localStorage.setItem('pt_ckey',ckey);
-  try{
-    const r=await fetch(`${url}/api/application/servers`,{headers:{'Authorization':`Bearer ${key}`,'Accept':'application/json'}});
-    if(r.ok){
-      const d=await r.json();
-      servers=(d.data||[]).map(s=>({id:s.attributes.identifier,name:s.attributes.name,status:s.attributes.status==='running'?'running':'offline',type:'Server',ram:s.attributes.limits.memory,ramUsed:0,disk:s.attributes.limits.disk,diskUsed:0,cpu:0,panel:'paid'}));
-      document.getElementById('server-badge').textContent=servers.length;
-      const notice=document.getElementById('srv-notice');if(notice)notice.style.display='none';
-      toast(`✓ Connected! Found ${servers.length} servers`,'success');
-    }else{toast('Saved (API returned '+r.status+')','info')}
-  }catch(e){toast('Saved · Panel offline or CORS blocked','info')}
-  await checkAdmin();
-}
-
-async function saveFreePanel(){
-  const url=document.getElementById('pt-free-url').value.trim().replace(/\/$/,'');
-  const key=document.getElementById('pt-free-key').value.trim();
-  C.freePanelUrl=url;C.freePanelKey=key;
-  localStorage.setItem('pt_free_url',url);localStorage.setItem('pt_free_key',key);
-  toast('Free panel saved!','success');
-}
-
-async function checkAdmin(){
-  isAdmin=false;
-  if(!C.pteroUrl||!C.pteroKey){
-    // Demo: auto-grant for preview
-    isAdmin=localStorage.getItem('lc_demo_admin')==='1';
-    applyAdmin();return;
-  }
-  try{
-    const r=await fetch(`${C.pteroUrl}/api/application/nodes`,{headers:{'Authorization':`Bearer ${C.pteroKey}`,'Accept':'application/json'}});
-    isAdmin=r.ok&&r.status!==403;
-  }catch(e){}
-  applyAdmin();
-}
-
-function applyAdmin(){
-  const nav=document.getElementById('admin-nav');
-  const av=document.getElementById('user-avatar');
-  const badge=document.getElementById('user-role-badge');
-  const planD=document.getElementById('user-plan-d');
-  if(isAdmin){
-    nav.style.display='block';
-    av.classList.add('avatar-admin');
-    if(badge){badge.textContent='ADMIN';badge.className='pill pill-admin'}
-    if(planD)planD.innerHTML='<span style="color:var(--admin)">🛡 Root Admin</span>';
-    toast('🛡 Admin access granted via Pterodactyl','success');
-  }else{
-    nav.style.display='none';
-    av.classList.remove('avatar-admin');
-    if(badge){badge.textContent='USER';badge.className='pill pill-blue'}
-  }
-}
-
-// ═══════ ADMIN RENDERERS ═══════
-function adminDenied(title){
-  return `<div class="access-denied"><div class="denied-icon">🛡</div><div class="denied-title">ACCESS DENIED</div><div class="denied-text">${title||'This section requires root_admin access in Pterodactyl.'}<br><br>Configure your Application API Key in <strong>Settings</strong> — admin status is verified automatically via the Pterodactyl API.</div><button class="btn btn-ghost" onclick="showTab('settings',null)" style="margin-top:8px">→ Go to Settings</button></div>`;
-}
-
-function renderAdmin(){
-  const el=document.getElementById('admin-main-content');if(!el)return;
-  if(!isAdmin){el.innerHTML=adminDenied();return}
-  const tc=adminUsers.reduce((s,u)=>s+u.coins,0);
-  const ts=adminUsers.reduce((s,u)=>s+u.servers,0);
-  el.innerHTML=`
-    <div class="admin-banner">
-      <span style="font-size:32px">🛡</span>
-      <div><div style="font-family:'Orbitron',monospace;font-size:16px;font-weight:900;color:var(--admin);letter-spacing:2px">ROOT ADMIN</div><div style="font-size:11px;color:var(--text2);margin-top:3px">Access granted via Pterodactyl Application API · root_admin = true</div></div>
-      <div style="margin-left:auto;display:flex;gap:10px">
-        <button class="btn btn-admin" onclick="showTab('admin-users',null)">👥 Users</button>
-        <button class="btn btn-admin" onclick="showTab('admin-coins',null)">✦ Coins</button>
-        <button class="btn btn-admin" onclick="showTab('admin-sys',null)">⚙ System</button>
-      </div>
-    </div>
-    <div class="admin-stats">
-      <div class="adm-stat"><div class="adm-stat-val">${adminUsers.length}</div><div class="adm-stat-label">Total Users</div></div>
-      <div class="adm-stat"><div class="adm-stat-val">${ts}</div><div class="adm-stat-label">Total Servers</div></div>
-      <div class="adm-stat"><div class="adm-stat-val">${tc.toLocaleString()}</div><div class="adm-stat-label">Coins Issued</div></div>
-      <div class="adm-stat"><div class="adm-stat-val">${adminUsers.filter(u=>u.status==='active').length}</div><div class="adm-stat-label">Active Users</div></div>
-    </div>
-    <div class="g2">
-      <div class="card"><div class="card-header"><div class="card-title" style="color:var(--admin)">⚡ Server Overview</div></div>
-        <div class="card-body" style="padding:0"><table class="tbl"><thead><tr><th>Server</th><th>User</th><th>Panel</th><th>Status</th><th>Actions</th></tr></thead><tbody>
-          ${servers.map(s=>`<tr><td><div style="font-weight:700">${s.name}</div><div style="font-size:9px;color:var(--text3)">${s.type}</div></td><td style="color:var(--text2)">CloudUser</td><td>${s.panel==='paid'?`<span class="pill pill-gold" style="font-size:8px">PAID</span>`:`<span class="pill pill-blue" style="font-size:8px">FREE</span>`}</td><td><span class="pill ${pill(s.status)}">${s.status.toUpperCase()}</span></td><td><div style="display:flex;gap:5px"><button class="btn btn-ghost" style="font-size:9px;padding:3px 7px" onclick="sAct('${s.id}','restart');renderAdmin()">↻</button><button class="btn btn-danger" style="font-size:9px;padding:3px 7px" onclick="sAct('${s.id}','stop');renderAdmin()">■</button></div></td></tr>`).join('')}
-        </tbody></table></div>
-      </div>
-      <div class="card"><div class="card-header"><div class="card-title" style="color:var(--admin)">◈ Node Summary</div></div>
-        <div class="card-body" style="padding:0"><table class="tbl"><thead><tr><th>Node</th><th>Servers</th><th>CPU</th><th>RAM</th><th>Status</th></tr></thead><tbody>
-          ${demoNodes.map(n=>`<tr><td><div style="font-weight:700;font-size:11px">${n.name}</div><div style="font-size:9px;color:var(--text3)">${n.loc}</div></td><td>${n.servers}</td><td style="color:${n.cpu>70?'var(--yellow)':'var(--green)'}">${n.cpu}%</td><td style="color:${n.ram>70?'var(--yellow)':'var(--green)'}">${n.ram}%</td><td><span class="pill ${n.status==='online'?'pill-green':n.status==='maintenance'?'pill-yellow':'pill-red'}">${n.status.toUpperCase()}</span></td></tr>`).join('')}
-        </tbody></table></div>
-      </div>
-    </div>`;
-}
-
-function renderAdminUsers(){
-  const el=document.getElementById('admin-users-content');if(!el)return;
-  if(!isAdmin){el.innerHTML=adminDenied();return}
-  el.innerHTML=`
-    <div class="sec-header"><div class="sec-title" style="color:var(--admin)">👥 USER MANAGER</div><button class="btn btn-admin" onclick="toast('Add user: requires live Pterodactyl API','info')">＋ Add User</button></div>
-    <div class="card"><div class="card-body" style="padding:0"><table class="tbl">
-      <thead><tr><th>User</th><th>Plan</th><th>Coins</th><th>Servers</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
-      <tbody>${adminUsers.map(u=>`
-        <tr>
-          <td><div style="font-weight:700">${u.name}${u.admin?` <span class="pill pill-admin" style="font-size:8px">ADMIN</span>`:''}</div><div style="font-size:10px;color:var(--text3)">${u.email}</div></td>
-          <td><span class="pill pill-purple">${u.plan}</span></td>
-          <td style="color:var(--gold);font-weight:700">✦ ${u.coins}</td>
-          <td>${u.servers}</td>
-          <td><span class="pill ${u.status==='active'?'pill-green':'pill-red'}">${u.status.toUpperCase()}</span></td>
-          <td style="color:var(--text3);font-size:10px">${u.joined}</td>
-          <td><div style="display:flex;gap:5px">
-            <button class="btn btn-gold" style="font-size:9px;padding:3px 8px" onclick="adminGiveCoins(${u.id},'${u.name}')">✦</button>
-            <button class="btn btn-ghost" style="font-size:9px;padding:3px 8px" onclick="toast('Edit user ${u.name}','info')">✎</button>
-            <button class="btn btn-danger" style="font-size:9px;padding:3px 8px" onclick="toast('Toggled suspend: ${u.name}','success')">${u.status==='active'?'⊘':'✓'}</button>
-          </div></td>
-        </tr>`).join('')}
-      </tbody></table></div></div>`;
-}
-
-function adminGiveCoins(uid,name){
-  const amt=parseInt(prompt(`Give coins to ${name}:`,'100'))||0;
-  if(amt>0){toast(`Gave ${amt} coins to ${name}`,'gold')}
-}
-
-function renderAdminCoins(){
-  const el=document.getElementById('admin-coins-content');if(!el)return;
-  if(!isAdmin){el.innerHTML=adminDenied();return}
-  el.innerHTML=`
-    <div class="sec-header"><div class="sec-title" style="color:var(--admin)">✦ COIN CONTROL</div></div>
-    <div class="g2">
-      <div class="card"><div class="card-header"><div class="card-title" style="color:var(--admin)">✦ Distribute Coins</div></div><div class="card-body">
-        <div class="form-group"><label class="form-label">Target User ID</label><input class="form-input" id="ac-uid" placeholder="User ID or 'all'"/></div>
-        <div class="form-row">
-          <div class="form-group"><label class="form-label">Amount</label><input class="form-input" id="ac-amt" type="number" placeholder="100"/></div>
-          <div class="form-group"><label class="form-label">Reason</label><input class="form-input" id="ac-reason" placeholder="Compensation"/></div>
-        </div>
-        <button class="btn btn-gold" style="width:100%;justify-content:center" onclick="adminDistributeCoins()">✦ Distribute Coins</button>
-        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
-          <div style="font-size:10px;color:var(--text3);letter-spacing:1px;margin-bottom:10px">GIVE COINS TO SELF (DEMO)</div>
-          <div style="display:flex;gap:8px">
-            <button class="btn btn-gold" style="font-size:10px" onclick="addCoins(100,'Admin Grant')">+100</button>
-            <button class="btn btn-gold" style="font-size:10px" onclick="addCoins(500,'Admin Grant')">+500</button>
-            <button class="btn btn-gold" style="font-size:10px" onclick="addCoins(1000,'Admin Grant')">+1000</button>
-          </div>
-        </div>
-      </div></div>
-      <div class="card"><div class="card-header"><div class="card-title" style="color:var(--admin)">✦ Coin Stats</div></div><div class="card-body">
-        ${adminUsers.map(u=>`<div class="earn-row"><div><div style="font-size:12px;font-weight:600">${u.name}</div><div style="font-size:10px;color:var(--text3)">${u.plan}</div></div><span class="pill pill-gold">✦ ${u.coins}</span></div>`).join('')}
-      </div></div>
-    </div>`;
-}
-function adminDistributeCoins(){
-  const uid=document.getElementById('ac-uid').value;
-  const amt=parseInt(document.getElementById('ac-amt').value)||0;
-  const reason=document.getElementById('ac-reason').value||'Admin Grant';
-  if(!uid||!amt){toast('Fill in user and amount','error');return}
-  if(uid==='all'){toast(`Distributed ${amt} coins to all users: ${reason}`,'gold')}
-  else{toast(`Gave ${amt} coins to user #${uid}: ${reason}`,'gold')}
-}
-
-function renderAdminSys(){
-  const el=document.getElementById('admin-sys-content');if(!el)return;
-  if(!isAdmin){el.innerHTML=adminDenied();return}
-  const totalCpu=demoNodes.reduce((s,n)=>s+n.cpu,0)/demoNodes.length;
-  const totalRam=demoNodes.reduce((s,n)=>s+n.ram,0)/demoNodes.length;
-  el.innerHTML=`
-    <div class="sec-header"><div class="sec-title" style="color:var(--admin)">⚙ SYSTEM MONITOR</div><button class="btn btn-ghost" style="font-size:9px;padding:5px 12px" onclick="renderAdminSys()">↻ REFRESH</button></div>
-    <div class="sys-monitor">
-      <div class="sys-card"><div class="sys-title">Avg Network CPU</div><div class="sys-val" style="color:${totalCpu>70?'var(--red)':totalCpu>50?'var(--yellow)':'var(--green)'}">${Math.round(totalCpu)}%</div><div class="pbar"><div class="pbar-fill ${totalCpu>70?'pb-red':totalCpu>50?'pb-yellow':'pb-blue'}" style="width:${totalCpu}%"></div></div></div>
-      <div class="sys-card"><div class="sys-title">Avg Network RAM</div><div class="sys-val" style="color:${totalRam>70?'var(--red)':totalRam>50?'var(--yellow)':'var(--green)'}">${Math.round(totalRam)}%</div><div class="pbar"><div class="pbar-fill ${totalRam>70?'pb-red':'pb-green'}" style="width:${totalRam}%"></div></div></div>
-      <div class="sys-card"><div class="sys-title">Active Nodes</div><div class="sys-val" style="color:var(--accent)">${demoNodes.filter(n=>n.status==='online').length} / ${demoNodes.length}</div><div class="pbar"><div class="pbar-fill pb-blue" style="width:${demoNodes.filter(n=>n.status==='online').length/demoNodes.length*100}%"></div></div></div>
-    </div>
-    <div class="card"><div class="card-header"><div class="card-title" style="color:var(--admin)">⚡ Live Node Matrix</div></div>
-      <div class="card-body" style="padding:0"><table class="tbl">
-        <thead><tr><th>Node</th><th>Location</th><th>CPU</th><th>RAM</th><th>Disk</th><th>Servers</th><th>Ping</th><th>Uptime</th><th>Status</th></tr></thead>
-        <tbody>${demoNodes.map(n=>`
-          <tr>
-            <td style="font-weight:700;font-family:'Orbitron',monospace;font-size:10px">${n.name}</td>
-            <td style="color:var(--text2);font-size:10px">${n.loc}</td>
-            <td><div style="display:flex;align-items:center;gap:7px"><div class="pbar" style="width:50px"><div class="pbar-fill ${n.cpu>70?'pb-red':n.cpu>50?'pb-yellow':'pb-blue'}" style="width:${n.cpu}%"></div></div><span style="font-size:10px;color:${n.cpu>70?'var(--red)':n.cpu>50?'var(--yellow)':'var(--green)'}">${n.cpu}%</span></div></td>
-            <td><div style="display:flex;align-items:center;gap:7px"><div class="pbar" style="width:50px"><div class="pbar-fill ${n.ram>70?'pb-red':'pb-green'}" style="width:${n.ram}%"></div></div><span style="font-size:10px;color:${n.ram>70?'var(--red)':n.ram>60?'var(--yellow)':'var(--green)'}">${n.ram}%</span></div></td>
-            <td><span style="font-size:10px;color:${n.disk>70?'var(--yellow)':'var(--green)'}">${n.disk}%</span></td>
-            <td style="color:var(--accent);font-weight:700">${n.servers}</td>
-            <td style="color:var(--accent)">${n.ping}</td>
-            <td style="color:var(--green)">${n.uptime}</td>
-            <td><span class="pill ${n.status==='online'?'pill-green':n.status==='maintenance'?'pill-yellow':'pill-red'}">${n.status.toUpperCase()}</span></td>
-          </tr>`).join('')}
-        </tbody></table></div></div>
-    <div class="g2" style="margin-top:14px">
-      <div class="card"><div class="card-header"><div class="card-title" style="color:var(--admin)">◻ System Log</div></div><div class="card-body">
-        <div class="act-item"><div class="act-dot" style="background:var(--green)"></div><div class="act-text"><strong>[INFO]</strong> All nodes reporting healthy</div><div class="act-time">now</div></div>
-        <div class="act-item"><div class="act-dot" style="background:var(--accent)"></div><div class="act-text"><strong>[INFO]</strong> API heartbeat OK — paid panel</div><div class="act-time">1m</div></div>
-        <div class="act-item"><div class="act-dot" style="background:var(--accent)"></div><div class="act-text"><strong>[INFO]</strong> API heartbeat OK — free panel</div><div class="act-time">1m</div></div>
-        <div class="act-item"><div class="act-dot" style="background:var(--yellow)"></div><div class="act-text"><strong>[WARN]</strong> Asia-SG-01 in maintenance mode</div><div class="act-time">2h</div></div>
-        <div class="act-item"><div class="act-dot" style="background:var(--green)"></div><div class="act-text"><strong>[INFO]</strong> Coin distribution system online</div><div class="act-time">3h</div></div>
-      </div></div>
-      <div class="card"><div class="card-header"><div class="card-title" style="color:var(--admin)">⚙ Quick Admin Actions</div></div><div class="card-body" style="display:flex;flex-direction:column;gap:7px">
-        <button class="btn btn-admin" style="width:100%;justify-content:flex-start" onclick="toast('Maintenance mode toggled','success')">🔧 Toggle Maintenance Mode</button>
-        <button class="btn btn-admin" style="width:100%;justify-content:flex-start" onclick="toast('Cache cleared across all nodes','success')">🗑 Clear All Node Cache</button>
-        <button class="btn btn-admin" style="width:100%;justify-content:flex-start" onclick="toast('Broadcast sent to all users','success')">📢 Broadcast to All Users</button>
-        <button class="btn btn-admin" style="width:100%;justify-content:flex-start" onclick="toast('Backup initiated on all servers','success')">💾 Force Backup All Servers</button>
-        <button class="btn btn-danger" style="width:100%;justify-content:flex-start" onclick="toast('Panel restart queued','error')">⚠ Restart Panel Service</button>
-      </div></div>
-    </div>`;
-}
-
-// ═══════ DISCORD ═══════
-function saveDC(){
-  C.dcToken=document.getElementById('dc-token').value;
-  C.dcGuild=document.getElementById('dc-guild').value;
-  C.dcInvite=document.getElementById('dc-invite').value||C.dcInvite;
-  localStorage.setItem('dc_tok',C.dcToken);localStorage.setItem('dc_guild',C.dcGuild);localStorage.setItem('dc_invite',C.dcInvite);
-  toast('Discord config saved!','success');
-  fetchDC();
-}
-async function fetchDC(){
-  if(!C.dcGuild)return;
-  try{
-    const r=await fetch(`https://discord.com/api/v10/guilds/${C.dcGuild}/preview`,{headers:{'Authorization':`Bot ${C.dcToken}`}});
-    if(r.ok){const d=await r.json();
-      ['dc-members','s-members'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=d.approximate_member_count||'—'});
-      const oe=document.getElementById('dc-online');if(oe)oe.textContent=d.approximate_presence_count||'—';
+// Mobile sidebar toggle
+function toggleSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const toggle = document.querySelector('.sidebar-toggle');
+  sidebar.classList.toggle('active');
+  
+  // Close sidebar when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.sidebar') && !e.target.closest('.sidebar-toggle')) {
+      sidebar.classList.remove('active');
     }
-  }catch(e){}
+  });
 }
-function openDiscord(){window.open(C.dcInvite||localStorage.getItem('dc_invite')||'https://discord.gg/','_blank')}
-function botAct(a){const m={verify:'✓ Verification message sent',roles:'⬡ Roles synced',announce:'◻ Announcement posted',status:'⚡ Status update sent',coins:'✦ Coin reward posted'};toast(m[a]||'Action executed','success')}
-function openPaidPanel(){window.open('https://paid.legacycloud.fun/auth/login','_blank')}
-function openFreePanel(){window.open('https://free.legacycloud.fun/auth/login','_blank')}
 
-// ═══════ TOAST / MODAL ═══════
-let toastTimeout;
-function toast(msg,type='success'){
-  clearTimeout(toastTimeout);
-  const t=document.getElementById('toast');
-  document.getElementById('t-msg').textContent=msg;
-  document.getElementById('t-icon').textContent=type==='success'?'✓':type==='error'?'✕':type==='gold'?'✦':'ℹ';
-  t.className='toast '+type+' show';
-  toastTimeout=setTimeout(()=>t.classList.remove('show'),3500);
-}
-function closeModal(id){document.getElementById(id).classList.remove('open')}
-
-// ═══════ INIT ═══════
-(function init(){
-  if(C.pteroUrl){const e=document.getElementById('pt-url');if(e)e.value=C.pteroUrl}
-  if(C.pteroKey){const e=document.getElementById('pt-key');if(e)e.value=C.pteroKey}
-  if(C.pteroClientKey){const e=document.getElementById('pt-ckey');if(e)e.value=C.pteroClientKey}
-  if(C.freePanelUrl){const e=document.getElementById('pt-free-url');if(e)e.value=C.freePanelUrl}
-  if(C.freePanelKey){const e=document.getElementById('pt-free-key');if(e)e.value=C.freePanelKey}
-  if(C.dcToken){const e=document.getElementById('dc-token');if(e)e.value=C.dcToken}
-  if(C.dcGuild){const e=document.getElementById('dc-guild');if(e)e.value=C.dcGuild}
-  if(C.dcInvite){const e=document.getElementById('dc-invite');if(e)e.value=C.dcInvite}
-  updateCoins();renderOv();fetchDC();
-  // Demo admin grant
-  setTimeout(()=>{
-    if(!isAdmin&&!C.pteroKey){
-      localStorage.setItem('lc_demo_admin','1');
-      isAdmin=true;applyAdmin();
-    }else{checkAdmin();}
-  },600);
-  // Live stat simulation
-  setInterval(()=>{
-    servers.filter(s=>s.status==='running').forEach(s=>{
-      s.cpu=Math.max(5,Math.min(95,s.cpu+(Math.random()-.5)*8));
-      s.ramUsed=Math.max(100,Math.min(s.ram,s.ramUsed+(Math.random()-.5)*50));
+// Tab switching
+function showTab(tabName, element) {
+  // Hide all tabs
+  document.querySelectorAll('.tab-content').forEach(tab => {
+    tab.classList.remove('active');
+  });
+  
+  // Show selected tab
+  const tab = document.getElementById(`tab-${tabName}`);
+  if (tab) tab.classList.add('active');
+  
+  // Update active nav item
+  if (element) {
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.classList.remove('active');
     });
-  },5000);
-})();
+    element.classList.add('active');
+  }
+  
+  // Close sidebar on mobile after selection
+  if (window.innerWidth <= 768) {
+    document.querySelector('.sidebar').classList.remove('active');
+  }
+}
+
+// Button functions
+function openDiscord() {
+  window.open('https://discord.gg/legacycloud', '_blank');
+}
+
+function openPaidPanel() {
+  window.open('https://paid.legacycloud.fun/auth/login', '_blank');
+}
+
+function openFreePanel() {
+  window.open('https://free.legacycloud.fun/auth/login', '_blank');
+}
+
+function refreshOv() {
+  console.log('Refreshing overview...');
+}
+
+// Responsive handler
+window.addEventListener('resize', () => {
+  const sidebar = document.querySelector('.sidebar');
+  if (window.innerWidth > 768) {
+    sidebar.classList.remove('active');
+  }
+});
+
+// Apply background on page load
+window.addEventListener('DOMContentLoaded', applyBackground);
+
+// Touch event handling for mobile
+document.addEventListener('touchstart', function() {}, false);
+
 </script>
+
 </body>
 </html>
