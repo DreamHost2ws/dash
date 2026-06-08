@@ -276,9 +276,16 @@ fi
 
 # ─── Permissions ─────────────────────────────────────────
 step "Setting file permissions"
-chown -R www-data:www-data "$INSTALL_DIR/public" 2>/dev/null || true
-chmod -R 755 "$INSTALL_DIR/public"
-ok "Permissions set"
+if [ -d "$INSTALL_DIR/public" ]; then
+  chown -R www-data:www-data "$INSTALL_DIR/public" 2>/dev/null || true
+  chmod -R 755 "$INSTALL_DIR/public"
+  ok "Permissions set for $INSTALL_DIR/public"
+else
+  warn "Public directory not found at $INSTALL_DIR/public — setting permissions on $INSTALL_DIR instead"
+  chown -R www-data:www-data "$INSTALL_DIR" 2>/dev/null || true
+  chmod -R 755 "$INSTALL_DIR" 2>/dev/null || true
+  ok "Permissions set for $INSTALL_DIR"
+fi
 
 # ─── Done! ───────────────────────────────────────────────
 echo ""
@@ -286,7 +293,7 @@ echo -e "${CYAN}╔════════════════════�
 echo -e "${CYAN}║${NC}  ${GREEN}${BOLD}✓ INSTALLATION COMPLETE!${NC}                              ${CYAN}║${NC}"
 echo -e "${CYAN}╚══════════════════════════════════════════════════════════╝${NC}"
 echo ""
-echo -e "  ${BOLD}Dashboard URL:${NC}  ${CYAN}https://$dash.yourdomain.com$
+echo -e "  ${BOLD}Dashboard URL:${NC}  ${CYAN}https://$DOMAIN${NC}"
 echo -e "  ${BOLD}Paid Panel:${NC}     ${YELLOW}$PAID_URL${NC}"
 echo -e "  ${BOLD}Free Panel:${NC}     ${CYAN}$FREE_URL${NC}"
 echo -e "  ${BOLD}Install Dir:${NC}    $INSTALL_DIR"
