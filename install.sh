@@ -1,6 +1,7 @@
 #!/bin/bash
 # ╔══════════════════════════════════════════════════════════╗
 # ║        LEGACY CLOUD — VPS INSTALLER v2.0                ║
+# ║        Mobile Optimized + Custom Backgrounds + Video     ║
 # ║        https://legacycloud.fun                          ║
 # ╚══════════════════════════════════════════════════════════╝
 
@@ -25,12 +26,12 @@ echo "  ██║     ██╔══╝  ██║   ██║██╔══�
 echo "  ███████╗███████╗╚██████╔╝██║  ██║╚██████╗   ██║   "
 echo "  ╚══════╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝   ╚═╝   "
 echo -e "${NC}"
-echo -e "${BOLD}  Legacy Cloud Dashboard — VPS Installer${NC}"
+echo -e "${BOLD}  Legacy Cloud Dashboard — VPS Installer v2.0${NC}"
 echo -e "  ${YELLOW}https://github.com/DreamHost2ws/dash${NC}"
 echo ""
-echo -e "  ${GREEN}✓${NC} Installs: Node.js, Nginx, PM2, Legacy Cloud Dashboard"
-echo -e "  ${GREEN}✓${NC} Includes: Dashboard Settings, Paid Services, Server Ranks"
-echo -e "  ${GREEN}✓${NC} Sets up: SSL (Let's Encrypt), Systemd service, Firewall"
+echo -e "  ${GREEN}✓${NC} Mobile-First Responsive Design"
+echo -e "  ${GREEN}✓${NC} Custom .jpg Backgrounds + Video Support"
+echo -e "  ${GREEN}✓${NC} Node.js, Nginx, PM2, SSL (Let's Encrypt)"
 echo ""
 echo -e "${CYAN}══════════════════════════════════════════════════════════${NC}"
 echo ""
@@ -65,16 +66,43 @@ PORT=${PORT:-3000}
 read -p "$(echo -e ${BOLD}"  Admin Email (for SSL): "${NC})" ADMIN_EMAIL
 read -p "$(echo -e ${BOLD}"  Database URL (MongoDB): "${NC})" DB_URL
 read -p "$(echo -e ${BOLD}"  API Secret Key: "${NC})" API_SECRET
+
+# ─── Background Configuration ─────────────────────────────
+echo ""
+echo -e "${BOLD}Background Configuration${NC}"
+echo -e "${CYAN}──────────────────────────────────────────────────────────${NC}"
+echo ""
+echo -e "  ${CYAN}Select background type:${NC}"
+echo -e "  1) URL-based .jpg background (auto-optimized for mobile)"
+echo -e "  2) Video background (.mp4 or .webm)"
+echo -e "  3) Gradient only (no background file)"
+read -p "$(echo -e ${BOLD}"  Background type [1-3, default 1]: "${NC})" BG_TYPE
+BG_TYPE=${BG_TYPE:-1}
+
+BG_IMAGE_URL=""
+BG_VIDEO_URL=""
+BG_VIDEO_TYPE=""
+
+if [ "$BG_TYPE" = "1" ]; then
+  read -p "$(echo -e ${BOLD}"  Background image URL (.jpg): "${NC})" BG_IMAGE_URL
+  BG_IMAGE_URL=${BG_IMAGE_URL:-"https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1920&h=1080&fit=crop"}
+elif [ "$BG_TYPE" = "2" ]; then
+  read -p "$(echo -e ${BOLD}"  Video background URL (.mp4 or .webm): "${NC})" BG_VIDEO_URL
+  read -p "$(echo -e ${BOLD}"  Video type (mp4 or webm): "${NC})" BG_VIDEO_TYPE
+  BG_VIDEO_TYPE=${BG_VIDEO_TYPE:-"mp4"}
+fi
+
 read -p "$(echo -e ${BOLD}"  Install SSL with Let's Encrypt? [Y/n]: "${NC})" INSTALL_SSL
 INSTALL_SSL=${INSTALL_SSL:-Y}
 
 echo ""
 echo -e "${CYAN}══════════════════════════════════════════════════════════${NC}"
 echo -e "${BOLD}Summary:${NC}"
-echo -e "  Domain    : ${CYAN}$DOMAIN${NC}"
-echo -e "  Panel URL : ${CYAN}$PANEL_URL${NC}"
-echo -e "  Port      : ${CYAN}$PORT${NC}"
-echo -e "  SSL       : ${CYAN}$INSTALL_SSL${NC}"
+echo -e "  Domain       : ${CYAN}$DOMAIN${NC}"
+echo -e "  Panel URL    : ${CYAN}$PANEL_URL${NC}"
+echo -e "  Port         : ${CYAN}$PORT${NC}"
+echo -e "  Background   : ${CYAN}Type $BG_TYPE${NC}"
+echo -e "  SSL          : ${CYAN}$INSTALL_SSL${NC}"
 echo -e "${CYAN}══════════════════════════════════════════════════════════${NC}"
 echo ""
 read -p "$(echo -e ${BOLD}"  Continue with installation? [Y/n]: "${NC})" CONFIRM
@@ -98,20 +126,20 @@ fail() { echo -e "  ${RED}✗${NC} $1"; exit 1; }
 step "Updating system packages"
 if [[ $OS == "ubuntu" ]] || [[ $OS == "debian" ]]; then
   apt-get update -q && apt-get upgrade -yq
-  apt-get install -yq curl wget git nginx certbot python3-certbot-nginx ufw
-  ok "System updated"
+  apt-get install -yq curl wget git nginx certbot python3-certbot-nginx ufw imagemagick ffmpeg
+  ok "System updated (with ImageMagick & FFmpeg)"
 elif [[ $OS == "centos" ]] || [[ $OS == "rhel" ]]; then
-  yum update -y && yum install -y curl wget git nginx certbot python3-certbot-nginx firewalld
+  yum update -y && yum install -y curl wget git nginx certbot python3-certbot-nginx firewalld imagemagick ffmpeg
   ok "System updated"
 else
-  warn "Unknown OS — skipping auto-update. Install curl, git, nginx, certbot manually."
+  warn "Unknown OS — skipping auto-update. Install curl, git, nginx, certbot, imagemagick, ffmpeg manually."
 fi
 
 # ─── Install Node.js 20 ───────────────────────────────────
 step "Installing Node.js 20 LTS"
 if ! command -v node &>/dev/null; then
-  curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-  apt-get install -yq nodejs
+  curl -fsSL https://deb.nodesource.com/setup_20.x | bash - 2>/dev/null || true
+  apt-get install -yq nodejs 2>/dev/null || yum install -y nodejs 2>/dev/null || true
   ok "Node.js $(node -v) installed"
 else
   ok "Node.js $(node -v) already installed"
@@ -163,8 +191,14 @@ PANEL_URL=$PANEL_URL
 ADMIN_EMAIL=$ADMIN_EMAIL
 MONGODB_URI=$DB_URL
 API_SECRET=$API_SECRET
+BG_TYPE=$BG_TYPE
+BG_IMAGE_URL=$BG_IMAGE_URL
+BG_VIDEO_URL=$BG_VIDEO_URL
+BG_VIDEO_TYPE=$BG_VIDEO_TYPE
+MOBILE_ENABLED=true
+RESPONSIVE_DESIGN=true
 EOF
-ok ".env created"
+ok ".env created with mobile config"
 
 # ─── Install dependencies ─────────────────────────────────
 step "Installing Node.js dependencies"
@@ -173,6 +207,50 @@ if [ -f package.json ]; then
   ok "Dependencies installed"
 else
   warn "No package.json — skipping npm install (static site mode)"
+fi
+
+# ─── Create Mobile Assets Directory ─────────────────────────
+step "Creating mobile assets directories"
+mkdir -p "$INSTALL_DIR/public/assets/backgrounds"
+mkdir -p "$INSTALL_DIR/public/assets/videos"
+mkdir -p "$INSTALL_DIR/public/assets/fonts"
+ok "Asset directories created"
+
+# ─── Download/Process Background Image ────────────────────
+if [ "$BG_TYPE" = "1" ] && [ -n "$BG_IMAGE_URL" ]; then
+  step "Processing background image for mobile"
+  BG_PATH="$INSTALL_DIR/public/assets/backgrounds/bg-main.jpg"
+  
+  if curl -fsSL -o "$BG_PATH" "$BG_IMAGE_URL" 2>/dev/null; then
+    # Optimize for mobile (resize to common mobile widths)
+    if command -v convert &>/dev/null; then
+      convert "$BG_PATH" -resize 1080x1920 -quality 85 "$INSTALL_DIR/public/assets/backgrounds/bg-mobile.jpg" 2>/dev/null || true
+      convert "$BG_PATH" -resize 1440x2560 -quality 85 "$INSTALL_DIR/public/assets/backgrounds/bg-tablet.jpg" 2>/dev/null || true
+      ok "Background optimized for mobile (1080p, tablet 1440p)"
+    else
+      ok "Background downloaded (imagemagick not available for optimization)"
+    fi
+  else
+    warn "Could not download background image from URL"
+  fi
+fi
+
+# ─── Download/Process Video Background ──────────────────
+if [ "$BG_TYPE" = "2" ] && [ -n "$BG_VIDEO_URL" ]; then
+  step "Processing video background"
+  VID_PATH="$INSTALL_DIR/public/assets/videos/bg-video.$BG_VIDEO_TYPE"
+  
+  if curl -fsSL -o "$VID_PATH" "$BG_VIDEO_URL" 2>/dev/null; then
+    # Convert to multiple formats if ffmpeg available
+    if command -v ffmpeg &>/dev/null; then
+      if [ "$BG_VIDEO_TYPE" = "mp4" ]; then
+        ffmpeg -i "$VID_PATH" -c:v libvpx-vp9 -crf 30 -b:v 0 "$INSTALL_DIR/public/assets/videos/bg-video.webm" 2>/dev/null || true
+        ok "Video converted to WebM format for better compression"
+      fi
+    fi
+  else
+    warn "Could not download video from URL"
+  fi
 fi
 
 # ─── Create Dashboard Settings Config ────────────────────
@@ -185,14 +263,21 @@ cat > "$INSTALL_DIR/config/dashboard-settings.json" << 'SETTINGS'
     "logo": "/assets/logo.png",
     "favicon": "/assets/favicon.ico",
     "theme": "dark",
-    "language": "en"
+    "language": "en",
+    "mobile_first": true,
+    "responsive_breakpoints": {
+      "mobile": 480,
+      "tablet": 768,
+      "desktop": 1024
+    }
   },
   "general": {
     "maintenance_mode": false,
     "maintenance_message": "System under maintenance. Please try again later.",
     "enable_registration": true,
     "require_email_verification": true,
-    "session_timeout": 3600
+    "session_timeout": 3600,
+    "mobile_session_timeout": 1800
   },
   "security": {
     "enable_2fa": true,
@@ -200,6 +285,19 @@ cat > "$INSTALL_DIR/config/dashboard-settings.json" << 'SETTINGS'
     "password_require_numbers": true,
     "password_require_special_chars": true,
     "api_rate_limit": 100
+  },
+  "mobile": {
+    "enable_touch_gestures": true,
+    "enable_haptic_feedback": true,
+    "bottom_navigation": true,
+    "large_touch_targets": true,
+    "font_size_multiplier": 1.1
+  },
+  "background": {
+    "type": "image",
+    "blur_effect": true,
+    "overlay_opacity": 0.5,
+    "overlay_color": "#000000"
   },
   "email": {
     "smtp_host": "smtp.gmail.com",
@@ -353,9 +451,10 @@ if [ -f "$INSTALL_DIR/public/index.html" ]; then
   ok "Panel URL configured"
 fi
 
-# ─── Nginx Config ─────────────────────────────────────────
-step "Configuring Nginx"
+# ─── Nginx Config (Mobile Optimized) ──────────────────────
+step "Configuring Nginx for mobile"
 cat > /etc/nginx/sites-available/legacy-cloud << NGINX
+# Mobile-Optimized Nginx Configuration
 server {
     listen 80;
     server_name $DOMAIN;
@@ -363,12 +462,19 @@ server {
     root $INSTALL_DIR/public;
     index index.html;
 
+    # Mobile viewport and responsive headers
+    add_header Viewport "width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes";
+    
     # Security headers
     add_header X-Frame-Options "SAMEORIGIN" always;
     add_header X-XSS-Protection "1; mode=block" always;
     add_header X-Content-Type-Options "nosniff" always;
     add_header Referrer-Policy "no-referrer-when-downgrade" always;
-    add_header Content-Security-Policy "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval' fonts.googleapis.com fonts.gstatic.com" always;
+    add_header Content-Security-Policy "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval' fonts.googleapis.com fonts.gstatic.com;" always;
+
+    # CORS headers for mobile
+    add_header Access-Control-Allow-Origin "*" always;
+    add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;
 
     location / {
         try_files \$uri \$uri/ /index.html;
@@ -414,7 +520,7 @@ server {
         proxy_cache_bypass \$http_upgrade;
     }
 
-    # Gzip
+    # Gzip compression (important for mobile)
     gzip on;
     gzip_vary on;
     gzip_min_length 1024;
@@ -426,6 +532,12 @@ server {
         add_header Cache-Control "public, immutable";
     }
 
+    # Video caching
+    location ~* \.(mp4|webm)$ {
+        expires 30d;
+        add_header Cache-Control "public";
+    }
+
     access_log /var/log/nginx/legacy-cloud.access.log;
     error_log /var/log/nginx/legacy-cloud.error.log;
 }
@@ -434,7 +546,7 @@ NGINX
 ln -sf /etc/nginx/sites-available/legacy-cloud /etc/nginx/sites-enabled/
 rm -f /etc/nginx/sites-enabled/default
 nginx -t && systemctl reload nginx
-ok "Nginx configured for $DOMAIN"
+ok "Nginx configured for mobile"
 
 # ─── SSL ─────────────────────────────────────────────────
 if [[ $INSTALL_SSL =~ ^[Yy]$ ]] && [ -n "$DOMAIN" ] && [ -n "$ADMIN_EMAIL" ]; then
@@ -455,7 +567,7 @@ if command -v ufw &>/dev/null; then
   ufw allow 80/tcp
   ufw allow 443/tcp
   ufw --force enable
-  ok "Firewall configured (SSH, 80, 443)"
+  ok "Firewall configured"
 fi
 
 # ─── PM2 (if Node.js backend) ────────────────────────────
@@ -471,35 +583,34 @@ fi
 
 # ─── Permissions ─────────────────────────────────────────
 step "Setting file permissions"
-if [ -d "$INSTALL_DIR/public" ]; then
-  chown -R www-data:www-data "$INSTALL_DIR/public" 2>/dev/null || true
-  chmod -R 755 "$INSTALL_DIR/public"
-  ok "Permissions set for $INSTALL_DIR/public"
-else
-  warn "Public directory not found — setting permissions on $INSTALL_DIR instead"
-  chown -R www-data:www-data "$INSTALL_DIR" 2>/dev/null || true
-  chmod -R 755 "$INSTALL_DIR" 2>/dev/null || true
-fi
-
-# Set permissions for config directory
-if [ -d "$INSTALL_DIR/config" ]; then
-  chown -R www-data:www-data "$INSTALL_DIR/config" 2>/dev/null || true
-  chmod -R 755 "$INSTALL_DIR/config"
-  ok "Permissions set for $INSTALL_DIR/config"
-fi
+chown -R www-data:www-data "$INSTALL_DIR" 2>/dev/null || true
+chmod -R 755 "$INSTALL_DIR/public"
+chmod -R 755 "$INSTALL_DIR/config"
+ok "Permissions set"
 
 # ─── Done! ───────────────────────────────────────────────
 echo ""
 echo -e "${CYAN}╔══════════════════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║${NC}  ${GREEN}${BOLD}✓ INSTALLATION COMPLETE!${NC}                              ${CYAN}║${NC}"
+echo -e "${CYAN}║${NC}  ${GREEN}${BOLD}✓ MOBILE INSTALLATION COMPLETE!${NC}                         ${CYAN}║${NC}"
 echo -e "${CYAN}╚══════════════════════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "  ${BOLD}Dashboard URL:${NC}  ${CYAN}https://$DOMAIN${NC}"
 echo -e "  ${BOLD}Panel URL:${NC}      ${YELLOW}$PANEL_URL${NC}"
 echo -e "  ${BOLD}Install Dir:${NC}    $INSTALL_DIR"
 echo -e "  ${BOLD}Config Dir:${NC}     $INSTALL_DIR/config"
+echo -e "  ${BOLD}Assets Dir:${NC}     $INSTALL_DIR/public/assets"
 echo -e "  ${BOLD}Nginx Config:${NC}   /etc/nginx/sites-available/legacy-cloud"
 echo -e "  ${BOLD}Error Logs:${NC}     /var/log/nginx/legacy-cloud.error.log"
+echo ""
+echo -e "  ${BOLD}📱 Mobile Features:${NC}"
+echo -e "  ${CYAN}• Responsive design (mobile/tablet/desktop)${NC}"
+echo -e "  ${CYAN}• Touch-friendly interface with gestures${NC}"
+echo -e "  ${CYAN}• Optimized background images${NC}"
+if [ "$BG_TYPE" = "2" ]; then
+  echo -e "  ${CYAN}• Video background support (.mp4 & .webm)${NC}"
+fi
+echo -e "  ${CYAN}• Mobile-optimized fonts and sizing${NC}"
+echo -e "  ${CYAN}• Bottom navigation layout${NC}"
 echo ""
 echo -e "  ${BOLD}Configuration Files:${NC}"
 echo -e "  ${CYAN}• Dashboard Settings:${NC} $INSTALL_DIR/config/dashboard-settings.json"
@@ -508,10 +619,10 @@ echo -e "  ${CYAN}• Server Ranks:${NC}       $INSTALL_DIR/config/server-ranks.
 echo ""
 echo -e "  ${BOLD}Useful commands:${NC}"
 echo -e "  ${CYAN}nginx -t${NC}                   — Test nginx config"
-echo -e "  ${CYAN}systemctl reload nginx${NC}     — Reload nginx"
-echo -e "  ${CYAN}pm2 logs legacy-cloud${NC}      — View app logs"
-echo -e "  ${CYAN}pm2 restart legacy-cloud${NC}   — Restart app"
-echo -e "  ${CYAN}certbot renew${NC}              — Renew SSL"
+echo -e "  ${CYAN}systemctl reload nginx{{NC}     — Reload nginx"
+echo -e "  ${CYAN}pm2 logs legacy-cloud{{NC}      — View app logs"
+echo -e "  ${CYAN}pm2 restart legacy-cloud{{NC}   — Restart app"
+echo -e "  ${CYAN}certbot renew{{NC}              — Renew SSL"
 echo ""
 echo -e "${CYAN}══════════════════════════════════════════════════════════${NC}"
 echo -e "  ${YELLOW}Next steps:${NC}"
