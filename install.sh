@@ -1,7 +1,7 @@
 #!/bin/bash
 # ╔══════════════════════════════════════════════════════════╗
-# ║        LEGACY CLOUD — VPS INSTALLER v1.0                ║
-# ║        https://legacycloud.fun                          ║
+# ║        LEGACY CLOUD — VPS INSTALLER v1.0                 ║
+# ║                  made by devaru007                       ║
 # ╚══════════════════════════════════════════════════════════╝
 
 set -e
@@ -49,7 +49,7 @@ else
   echo -e "${RED}✗ Cannot detect OS${NC}"; exit 1
 fi
 
-echo -e "${BLUE}► Detected OS: ${BOLD}$PRETTY_NAME${NC}"
+echo -e "${BLUE}► Detected OS: ${BOLD}$debain${NC}"
 echo ""
 
 # ─── Collect Config ───────────────────────────────────────
@@ -131,10 +131,27 @@ step "Setting up Legacy Cloud dashboard"
 INSTALL_DIR="/var/www/legacy-cloud"
 if [ -d "$INSTALL_DIR" ]; then
   warn "Directory exists — pulling latest"
-  cd "$INSTALL_DIR" && git pull
+  cd "$INSTALL_DIR" && git pull || warn "git pull failed — continuing"
 else
-  git clone https://github.com/YOUR_GITHUB/legacy-cloud "$INSTALL_DIR"
-  ok "Cloned repository to $INSTALL_DIR"
+  # Try cloning via git first (may prompt for credentials for private repos).
+  # Attempt anonymous clone (no password prompt). Fall back to archive download if unavailable.
+  if GIT_TERMINAL_PROMPT=0 git clone --depth 1 https://github.com/DreamHost2ws/dash.git "$INSTALL_DIR" 2>/dev/null; then
+    ok "Cloned repository to $INSTALL_DIR"
+  else
+    warn "git clone failed (likely private or unavailable). Falling back to anonymous archive download. No password required."
+    mkdir -p "$INSTALL_DIR"
+    # Ensure unzip is available
+    if ! command -v unzip &>/dev/null; then
+      apt-get update -yq || true
+      apt-get install -yq unzip || true
+    fi
+    TMPZIP="/tmp/dash-main.zip"
+    curl -fsSL -o "$TMPZIP" https://github.com/DreamHost2ws/dash/archive/refs/heads/main.zip
+    unzip -q "$TMPZIP" -d /tmp
+    mv /tmp/dash-main/* "$INSTALL_DIR" || true
+    rm -f "$TMPZIP"
+    ok "Downloaded repository archive to $INSTALL_DIR"
+  fi
 fi
 
 cd "$INSTALL_DIR"
@@ -269,7 +286,7 @@ echo -e "${CYAN}╔════════════════════�
 echo -e "${CYAN}║${NC}  ${GREEN}${BOLD}✓ INSTALLATION COMPLETE!${NC}                              ${CYAN}║${NC}"
 echo -e "${CYAN}╚══════════════════════════════════════════════════════════╝${NC}"
 echo ""
-echo -e "  ${BOLD}Dashboard URL:${NC}  ${CYAN}https://$DOMAIN${NC}"
+echo -e "  ${BOLD}Dashboard URL:${NC}  ${CYAN}https://$dash.yourdomain.com$
 echo -e "  ${BOLD}Paid Panel:${NC}     ${YELLOW}$PAID_URL${NC}"
 echo -e "  ${BOLD}Free Panel:${NC}     ${CYAN}$FREE_URL${NC}"
 echo -e "  ${BOLD}Install Dir:${NC}    $INSTALL_DIR"
